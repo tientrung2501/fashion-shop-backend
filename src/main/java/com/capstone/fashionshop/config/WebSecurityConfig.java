@@ -44,6 +44,10 @@ public class WebSecurityConfig {
             "/configuration/security",
             "/swagger-ui.html",
             "/webjars/**",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/ws/**"
+
     };
 
     private final String[] ALLOWED_GET_LIST_URLS = {
