@@ -1,0 +1,12 @@
+package com.capstone.fashionshop.config;
+
+public class Constants {
+    //ROLE
+    public static final String ROLE_ADMIN = "ROLE_ADMIN";
+    public static final String ROLE_USER = "ROLE_USER";
+    //USER STATE
+    public static final String USER_STATE_ACTIVATED = "activated";
+    public static final String USER_STATE_DEACTIVATED = "deactivated";
+
+
+}

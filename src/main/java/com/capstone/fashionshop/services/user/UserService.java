@@ -1,8 +1,7 @@
-package com.capstone.fashionshop.services.impl;
+package com.capstone.fashionshop.services.user;
 
 import com.capstone.fashionshop.models.entities.User;
 import com.capstone.fashionshop.repository.UserRepository;
-import com.capstone.fashionshop.services.IUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

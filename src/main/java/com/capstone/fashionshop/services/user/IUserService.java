@@ -1,4 +1,4 @@
-package com.capstone.fashionshop.services;
+package com.capstone.fashionshop.services.user;
 
 import com.capstone.fashionshop.models.entities.User;
 
