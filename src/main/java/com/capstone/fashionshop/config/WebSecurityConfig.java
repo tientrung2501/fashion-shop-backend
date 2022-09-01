@@ -2,7 +2,9 @@ package com.capstone.fashionshop.config;
 
 import com.capstone.fashionshop.security.jwt.AuthEntryPointJwt;
 import com.capstone.fashionshop.security.jwt.JwtFilter;
-import com.capstone.fashionshop.security.user.CustomUserDetailsService;
+import com.capstone.fashionshop.security.oauth.CustomOAuth2UserService;
+import com.capstone.fashionshop.security.oauth.handlers.Failure;
+import com.capstone.fashionshop.security.oauth.handlers.Success;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,12 +18,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,11 +33,14 @@ import java.util.List;
 public class WebSecurityConfig {
     private final JwtFilter jwtFilter;
     private final AuthEntryPointJwt unauthorizedHandler;
+    private final CustomOAuth2UserService oAuth2UserService;
+    private final Success successHandler;
 
     private final String[] ALLOWED_LIST_URLS = {
             "/api/auth/**",
             "/api/oauth/**",
             "/oauth2/**",
+            "/login/**",
             // SwaggerUI
             "/v2/api-docs",
             "/swagger-resources",
@@ -51,6 +56,9 @@ public class WebSecurityConfig {
     };
 
     private final String[] ALLOWED_GET_LIST_URLS = {
+            "/api/products/**",
+            "/api/categories/**",
+            "/api/brands/**",
 
     };
 
@@ -68,7 +76,14 @@ public class WebSecurityConfig {
                 .hasAuthority(Constants.ROLE_ADMIN).and()
                 .authorizeRequests().antMatchers("/api/**")
                 .hasAnyAuthority(Constants.ROLE_USER, Constants.ROLE_ADMIN)
-                .anyRequest().authenticated();
+                .anyRequest().authenticated()
+                .and()
+                .oauth2Login()
+                .userInfoEndpoint()
+                .userService(oAuth2UserService)
+                .and()
+                .successHandler(successHandler)
+                .failureHandler(authenticationFailureHandler());
 
 
 
@@ -93,11 +108,16 @@ public class WebSecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token", "origin", "x-request-with", "accept"));
-        configuration.setExposedHeaders(Arrays.asList("x-auth-token"));
+        configuration.setExposedHeaders(List.of("x-auth-token"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    @Bean
+    public AuthenticationFailureHandler authenticationFailureHandler() {
+        return new Failure();
     }
 
 

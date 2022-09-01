@@ -22,8 +22,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -57,14 +55,14 @@ public class AuthService implements IAuthService {
     @Override
     public ResponseEntity<?> register(RegisterReq req) {
         if (userRepository.existsByEmail(req.getEmail()))
-            throw new AppException(409, "Email already exists");
+            throw new AppException(HttpStatus.CONFLICT.value(), "Email already exists");
         req.setPassword(passwordEncoder.encode(req.getPassword()));
         User user = userMapper.toUser(req);
         if (user != null) {
             try {
-                userRepository.save(user);
+                userRepository.insert(user);
             } catch (Exception e){
-                throw new AppException(417, e.getMessage());
+                throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), e.getMessage());
             }
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(
