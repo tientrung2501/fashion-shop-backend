@@ -58,7 +58,7 @@ public class CategoryService implements ICategoryService {
     @Override
     @Transactional
     public ResponseEntity<?> addCategory(CategoryReq req) {
-        String imgUrl = "";
+        String imgUrl = null;
         if (req.getFile() != null && !req.getFile().isEmpty()) {
             try {
                 imgUrl = cloudinary.uploadImage(req.getFile(), null);

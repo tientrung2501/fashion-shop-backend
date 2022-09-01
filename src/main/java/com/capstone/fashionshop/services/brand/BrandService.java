@@ -73,12 +73,14 @@ public class BrandService implements IBrandService {
                 try {
                     String imgUrl = cloudinary.uploadImage(file, brand.get().getImage());
                     brand.get().setImage(imgUrl);
-                    brandRepository.save(brand.get());
                 } catch (IOException e) {
                     throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "Error when upload image");
-                } catch (DuplicateKeyException e) {
-                    throw new AppException(HttpStatus.CONFLICT.value(), "Brand name already exists");
                 }
+            }
+            try {
+                brandRepository.save(brand.get());
+            } catch (DuplicateKeyException e) {
+                throw new AppException(HttpStatus.CONFLICT.value(), "Brand name already exists");
             }
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Update brand success", brand));
