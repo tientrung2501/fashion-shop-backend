@@ -1,7 +1,7 @@
 package com.capstone.fashionshop.payload.response;
 
-import com.capstone.fashionshop.models.entities.Brand;
-import com.capstone.fashionshop.models.entities.Category;
+import com.capstone.fashionshop.models.entities.product.ProductAttribute;
+import com.capstone.fashionshop.models.entities.product.ProductImage;
 import com.capstone.fashionshop.models.entities.product.ProductOption;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -23,8 +23,9 @@ public class ProductRes {
     private BigDecimal price;
     private BigDecimal discountPrice;
     private int discount;
-    private Category category;
-    private Brand brand;
+    private String category;
+    private String brand;
     private String state;
-    private List<ProductOption> productOptions;
+    private List<ProductAttribute> attr;
+    private List<ProductImage> images;
 }

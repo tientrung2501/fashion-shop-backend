@@ -1,29 +1,36 @@
 package com.capstone.fashionshop.models.entities.product;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "product_option")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class ProductOption {
     @Id
     private String id;
     @NotBlank(message = "Name is required")
     private String name;
-    @NotBlank(message = "Stock is required")
-    private Long stock;
-    private int discount;
-    private Color color;
+    private List<ProductVariant> variants = new ArrayList<>();
     private BigDecimal extraFee;
-    private List<ProductImage> images;
     @DocumentReference(lazy = true)
+    @JsonIgnore
     private Product product;
+
+    public ProductOption(String name, BigDecimal extraFee) {
+        this.name = name;
+        this.extraFee = extraFee;
+    }
 }

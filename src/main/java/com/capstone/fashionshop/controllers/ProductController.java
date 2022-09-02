@@ -1,5 +1,6 @@
 package com.capstone.fashionshop.controllers;
 
+import com.capstone.fashionshop.models.entities.product.ProductAttribute;
 import com.capstone.fashionshop.payload.request.ProductReq;
 import com.capstone.fashionshop.services.product.IProductService;
 import lombok.AllArgsConstructor;
@@ -46,5 +47,23 @@ public class ProductController {
     @DeleteMapping("/admin/products/{id}")
     public ResponseEntity<?> deleteProduct(@PathVariable("id") String id) {
         return productService.deactivatedProduct(id);
+    }
+
+    @PostMapping("/admin/products/attribute/{productId}")
+    public ResponseEntity<?> addAttribute(@PathVariable("productId") String id ,
+                                          @Valid @RequestBody ProductAttribute req) {
+        return productService.addAttribute(id, req);
+    }
+
+    @PutMapping("/admin/products/attribute/{productId}")
+    public ResponseEntity<?> updateAttribute(@PathVariable("productId") String id,
+                                           @Valid @RequestBody ProductAttribute req) {
+        return productService.updateAttribute(id, req);
+    }
+
+    @DeleteMapping("/admin/products/attribute/{productId}")
+    public ResponseEntity<?> deleteAttribute(@PathVariable("productId") String id,
+                                             @Valid @RequestBody String name) {
+        return productService.deleteAttribute(id, name);
     }
 }

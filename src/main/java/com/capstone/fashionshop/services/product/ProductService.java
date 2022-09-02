@@ -7,6 +7,7 @@ import com.capstone.fashionshop.mapper.ProductMapper;
 import com.capstone.fashionshop.models.entities.Brand;
 import com.capstone.fashionshop.models.entities.Category;
 import com.capstone.fashionshop.models.entities.product.Product;
+import com.capstone.fashionshop.models.entities.product.ProductAttribute;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.payload.request.ProductReq;
 import com.capstone.fashionshop.payload.response.ProductRes;
@@ -150,6 +151,47 @@ public class ProductService implements IProductService {
             productRepository.save(product.get());
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Delete product successfully ", "")
+            );
+        } throw new NotFoundException("Can not found product with id: "+id);
+    }
+
+    @Override
+    public ResponseEntity<?> addAttribute(String id, ProductAttribute req) {
+        Optional<Product> product = productRepository.findProductByIdAndState(id, Constants.ENABLE);
+        if (product.isPresent()) {
+            if (product.get().getAttr().stream().anyMatch(a -> a.getName().equals(req.getName())))
+                throw new AppException(HttpStatus.CONFLICT.value(), "Attribute name already exists");
+            ProductAttribute attribute = new ProductAttribute(req.getName(), req.getVal());
+            product.get().getAttr().add(attribute);
+            productRepository.save(product.get());
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Add attribute successfully", attribute)
+            );
+        } throw new NotFoundException("Can not found product with id: "+id);
+    }
+
+    @Override
+    public ResponseEntity<?> updateAttribute(String id, ProductAttribute req) {
+        Optional<Product> product = productRepository.findProductByIdAndState(id, Constants.ENABLE);
+        if (product.isPresent()) {
+            product.get().getAttr().stream().forEach(a -> {
+                if (a.getName().equals(req.getName())) a.setVal(req.getVal());
+            });
+            productRepository.save(product.get());
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Update attribute successfully", "")
+            );
+        } throw new NotFoundException("Can not found product with id: "+id);
+    }
+
+    @Override
+    public ResponseEntity<?> deleteAttribute(String id, String name) {
+        Optional<Product> product = productRepository.findProductByIdAndState(id, Constants.ENABLE);
+        if (product.isPresent()) {
+            product.get().getAttr().removeIf(a -> a.getName().equals(name));
+            productRepository.save(product.get());
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Delete attribute successfully", "")
             );
         } throw new NotFoundException("Can not found product with id: "+id);
     }

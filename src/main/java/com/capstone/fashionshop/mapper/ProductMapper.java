@@ -5,6 +5,7 @@ import com.capstone.fashionshop.exception.NotFoundException;
 import com.capstone.fashionshop.models.entities.Brand;
 import com.capstone.fashionshop.models.entities.Category;
 import com.capstone.fashionshop.models.entities.product.Product;
+import com.capstone.fashionshop.models.entities.product.ProductImage;
 import com.capstone.fashionshop.payload.request.ProductReq;
 import com.capstone.fashionshop.payload.response.ProductRes;
 import com.capstone.fashionshop.repository.BrandRepository;
@@ -12,6 +13,10 @@ import com.capstone.fashionshop.repository.CategoryRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,12 +31,24 @@ public class ProductMapper {
         if (category.isEmpty() || brand.isEmpty())
             throw new NotFoundException("Can not found category or brand");
         return new Product(req.getName(), req.getDescription(), req.getPrice(),
-                category.get(), brand.get(), Constants.ENABLE);
+                category.get(), brand.get(), Constants.ENABLE, req.getDiscount());
     }
 
     public ProductRes toProductRes(Product req) {
+        List<ProductImage> images = new ArrayList<>();
+        req.getProductOptions().stream().forEach(p -> {
+            p.getVariants().stream().forEach(v-> {
+                v.getImages().stream().forEach(i -> {
+                    if (i.isThumbnail() && !images.contains(i)) images.add(i);
+                    System.out.println(i);
+                    System.out.println(images.contains(i));
+                });
+            });
+        });
+        BigDecimal discountPrice = BigDecimal.valueOf(req.getPrice().doubleValue()/100 * (100 - req.getDiscount()))
+                .setScale(2, RoundingMode.HALF_UP).stripTrailingZeros();
         return new ProductRes(req.getId(), req.getName(), req.getUrl(), req.getDescription(),
-                req.getPrice(),req.getPrice(), 0, req.getCategory(), req.getBrand(), req.getState(),
-                req.getProductOptions());
+                req.getPrice(),discountPrice, req.getDiscount(), req.getCategory().getName(),
+                req.getBrand().getName(), req.getState(), req.getAttr(), images);
     }
 }
