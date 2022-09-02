@@ -14,10 +14,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -35,18 +35,16 @@ public class ProductMapper {
     }
 
     public ProductRes toProductRes(Product req) {
-        List<ProductImage> images = new ArrayList<>();
-        req.getProductOptions().stream().forEach(p -> {
-            p.getVariants().stream().forEach(v-> {
-                v.getImages().stream().forEach(i -> {
-                    if (i.isThumbnail() && !images.contains(i)) images.add(i);
-                    System.out.println(i);
-                    System.out.println(images.contains(i));
-                });
-            });
-        });
-        BigDecimal discountPrice = BigDecimal.valueOf(req.getPrice().doubleValue()/100 * (100 - req.getDiscount()))
-                .setScale(2, RoundingMode.HALF_UP).stripTrailingZeros();
+        List<ProductImage> images = req.getProductOptions().stream()
+                .flatMap(p -> p.getVariants().stream())
+                .flatMap(v -> v.getImages().stream())
+                .filter(ProductImage::isThumbnail).distinct().collect(Collectors.toList());
+        HashSet<Object> seen=new HashSet<>();
+        images.removeIf(e->!seen.add(e.getId()));
+
+        String discountString = req.getPrice().multiply(BigDecimal.valueOf((double) (100- req.getDiscount())/100))
+                .stripTrailingZeros().toPlainString();
+        BigDecimal discountPrice = new BigDecimal(discountString);
         return new ProductRes(req.getId(), req.getName(), req.getUrl(), req.getDescription(),
                 req.getPrice(),discountPrice, req.getDiscount(), req.getCategory().getName(),
                 req.getBrand().getName(), req.getState(), req.getAttr(), images);
