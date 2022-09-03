@@ -1,7 +1,6 @@
 package com.capstone.fashionshop.payload.request;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.Range;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.*;

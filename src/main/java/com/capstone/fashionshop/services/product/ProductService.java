@@ -10,18 +10,19 @@ import com.capstone.fashionshop.models.entities.product.Product;
 import com.capstone.fashionshop.models.entities.product.ProductAttribute;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.payload.request.ProductReq;
+import com.capstone.fashionshop.payload.response.ProductListRes;
 import com.capstone.fashionshop.payload.response.ProductRes;
-import com.capstone.fashionshop.repository.BrandRepository;
-import com.capstone.fashionshop.repository.CategoryRepository;
-import com.capstone.fashionshop.repository.ProductRepository;
+import com.capstone.fashionshop.repository.*;
 import com.capstone.fashionshop.utils.StringUtils;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,15 +30,18 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ProductService implements IProductService {
     private final ProductRepository productRepository;
+    private final ProductOptionRepository productOptionRepository;
+    private final ProductImageRepository productImageRepository;
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
     private final ProductMapper productMapper;
     @Override
     public ResponseEntity<?> findAll(Pageable pageable) {
         Page<Product> products = productRepository.findAll(pageable);
-        List<ProductRes> resList = products.getContent().stream().map(productMapper::toProductRes).collect(Collectors.toList());
+        List<ProductListRes> resList = products.getContent().stream().map(productMapper::toProductListRes).collect(Collectors.toList());
         if (resList.size() >0 )
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Get all product success", resList));
@@ -64,7 +68,7 @@ public class ProductService implements IProductService {
         } catch (Exception e) {
             throw new AppException(HttpStatus.BAD_REQUEST.value(), "Error when finding");
         }
-        List<ProductRes> resList = products.stream().map(productMapper::toProductRes).collect(Collectors.toList());
+        List<ProductListRes> resList = products.stream().map(productMapper::toProductListRes).collect(Collectors.toList());
         if (resList.size() > 0 )
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Get all product success", resList));
@@ -80,7 +84,8 @@ public class ProductService implements IProductService {
     public ResponseEntity<?> addProduct(ProductReq req) {
         if (req != null) {
             Product product = productMapper.toProduct(req);
-            String url = "/" + StringUtils.toSlug(product.getName());
+            String url = "/" + StringUtils.toSlug(product.getCategory().getName()) +
+                     "/" + StringUtils.toSlug(product.getName());
             if (productRepository.existsProductByUrl(url))
                 url = url + System.currentTimeMillis();
             product.setUrl(url);
@@ -89,7 +94,7 @@ public class ProductService implements IProductService {
             } catch (Exception e) {
                 throw new AppException(HttpStatus.CONFLICT.value(), "Product name already exists");
             }
-            ProductRes res = productMapper.toProductRes(product);
+            ProductListRes res = productMapper.toProductListRes(product);
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     new ResponseObject(true, "Add product successfully ", res)
             );
@@ -109,7 +114,7 @@ public class ProductService implements IProductService {
             } catch (Exception e) {
                 throw new AppException(HttpStatus.CONFLICT.value(), "Product name already exists");
             }
-            ProductRes res = productMapper.toProductRes(product.get());
+            ProductListRes res = productMapper.toProductListRes(product.get());
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Add product successfully ", res)
             );
@@ -156,6 +161,25 @@ public class ProductService implements IProductService {
     }
 
     @Override
+    @Transactional
+    public ResponseEntity<?> destroyProduct(String id) {
+        Optional<Product> product = productRepository.findProductByIdAndState(id, Constants.ENABLE);
+        if (product.isPresent()) {
+            try {
+                productRepository.deleteById(product.get().getId());
+                productImageRepository.deleteByProduct_Id(product.get().getId());
+                productOptionRepository.deleteByProduct_Id(product.get().getId());
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                throw new NotFoundException("Error when destroy product with id: "+id);
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Destroy product successfully ", "")
+            );
+        } throw new NotFoundException("Can not found product with id: "+id);
+    }
+
+    @Override
     public ResponseEntity<?> addAttribute(String id, ProductAttribute req) {
         Optional<Product> product = productRepository.findProductByIdAndState(id, Constants.ENABLE);
         if (product.isPresent()) {
@@ -174,7 +198,7 @@ public class ProductService implements IProductService {
     public ResponseEntity<?> updateAttribute(String id, ProductAttribute req) {
         Optional<Product> product = productRepository.findProductByIdAndState(id, Constants.ENABLE);
         if (product.isPresent()) {
-            product.get().getAttr().stream().forEach(a -> {
+            product.get().getAttr().forEach(a -> {
                 if (a.getName().equals(req.getName())) a.setVal(req.getVal());
             });
             productRepository.save(product.get());

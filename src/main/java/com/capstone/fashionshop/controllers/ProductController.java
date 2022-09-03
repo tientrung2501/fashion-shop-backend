@@ -49,6 +49,11 @@ public class ProductController {
         return productService.deactivatedProduct(id);
     }
 
+    @DeleteMapping("/admin/products/destroy/{id}")
+    public ResponseEntity<?> destroyProduct(@PathVariable("id") String id) {
+        return productService.destroyProduct(id);
+    }
+
     @PostMapping("/admin/products/attribute/{productId}")
     public ResponseEntity<?> addAttribute(@PathVariable("productId") String id ,
                                           @Valid @RequestBody ProductAttribute req) {

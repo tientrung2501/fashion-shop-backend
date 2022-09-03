@@ -106,11 +106,26 @@ public class ProductOptionService implements IProductOptionService {
 
     @Override
     public ResponseEntity<?> findOptionByProductId(String id) {
-        return null;
+        List<ProductOption> productOptions = productOptionRepository.findAllByProduct_Id(new ObjectId(id));
+        if (productOptions.size() > 0) {
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Get product option success", productOptions));
+        } throw new NotFoundException("Can not found any product option with id: "+id);
     }
 
     @Override
     public ResponseEntity<?> updateOption(String id, ProductOptionReq req) {
-        return null;
+        Optional<ProductOption> productOption = productOptionRepository.findById(id);
+        if (productOption.isPresent()) {
+            productOption.get().setName(req.getName());
+            productOption.get().setExtraFee(req.getExtraFee());
+            try {
+                productOptionRepository.save(productOption.get());
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
+
+
+        } throw new NotFoundException("Can not found product option with id: "+id);
     }
 }

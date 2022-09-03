@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface ProductImageRepository extends MongoRepository<ProductImage, String> {
     List<ProductImage> findAllByColorAndProduct_Id(String color, ObjectId productId);
+    void deleteByProduct_Id(String id);
 }

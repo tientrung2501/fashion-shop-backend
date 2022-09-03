@@ -7,6 +7,7 @@ import com.capstone.fashionshop.models.entities.Category;
 import com.capstone.fashionshop.models.entities.product.Product;
 import com.capstone.fashionshop.models.entities.product.ProductImage;
 import com.capstone.fashionshop.payload.request.ProductReq;
+import com.capstone.fashionshop.payload.response.ProductListRes;
 import com.capstone.fashionshop.payload.response.ProductRes;
 import com.capstone.fashionshop.repository.BrandRepository;
 import com.capstone.fashionshop.repository.CategoryRepository;
@@ -34,7 +35,7 @@ public class ProductMapper {
                 category.get(), brand.get(), Constants.ENABLE, req.getDiscount());
     }
 
-    public ProductRes toProductRes(Product req) {
+    public ProductListRes toProductListRes(Product req) {
         List<ProductImage> images = req.getProductOptions().stream()
                 .flatMap(p -> p.getVariants().stream())
                 .flatMap(v -> v.getImages().stream())
@@ -45,8 +46,17 @@ public class ProductMapper {
         String discountString = req.getPrice().multiply(BigDecimal.valueOf((double) (100- req.getDiscount())/100))
                 .stripTrailingZeros().toPlainString();
         BigDecimal discountPrice = new BigDecimal(discountString);
+        return new ProductListRes(req.getId(), req.getName(), req.getUrl(), req.getDescription(),
+                req.getPrice(),discountPrice, req.getDiscount(), req.getCategory().getName(),
+                req.getBrand().getName(), req.getState(), req.getCreatedDate(), req.getAttr(), images);
+    }
+
+    public ProductRes toProductRes(Product req) {
+        String discountString = req.getPrice().multiply(BigDecimal.valueOf((double) (100- req.getDiscount())/100))
+                .stripTrailingZeros().toPlainString();
+        BigDecimal discountPrice = new BigDecimal(discountString);
         return new ProductRes(req.getId(), req.getName(), req.getUrl(), req.getDescription(),
                 req.getPrice(),discountPrice, req.getDiscount(), req.getCategory().getName(),
-                req.getBrand().getName(), req.getState(), req.getAttr(), images);
+                req.getBrand().getName(), req.getState(), req.getAttr(), req.getProductOptions());
     }
 }

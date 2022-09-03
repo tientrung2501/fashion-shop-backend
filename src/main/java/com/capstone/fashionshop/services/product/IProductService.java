@@ -13,6 +13,7 @@ public interface IProductService {
     ResponseEntity<?> addProduct(ProductReq req);
     ResponseEntity<?> updateProduct(String id, ProductReq req);
     ResponseEntity<?> deactivatedProduct(String id);
+    ResponseEntity<?> destroyProduct(String id);
     ResponseEntity<?> addAttribute(String id, ProductAttribute req);
     ResponseEntity<?> updateAttribute(String id, ProductAttribute req);
     ResponseEntity<?> deleteAttribute(String id, String name);
