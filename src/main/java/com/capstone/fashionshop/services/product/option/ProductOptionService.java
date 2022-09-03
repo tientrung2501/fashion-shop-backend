@@ -43,10 +43,11 @@ public class ProductOptionService implements IProductOptionService {
     public ResponseEntity<?> addOption(String productId ,ProductOptionReq req) {
         Optional<ProductOption> checkOption = productOptionRepository.findByNameAndVariantsColorAndProductId(
                 req.getName(), req.getColor(), new ObjectId(productId));
-        if (checkOption.isPresent())
+        if (checkOption.isPresent()) {
             throw new AppException(HttpStatus.CONFLICT.value(),
                     String.format("Option with name: %s, color code: %s, product id: %s already exists",
                             req.getName(), req.getColor(), productId));
+        }
         Optional<ProductOption> option = productOptionRepository.findByNameAndProduct_Id(req.getName(), new ObjectId(productId));
         Optional<Product> product = productRepository.findProductByIdAndState(productId, Constants.ENABLE);
         if (product.isEmpty()) throw new NotFoundException("Can not found product with id: "+productId);
@@ -65,7 +66,7 @@ public class ProductOptionService implements IProductOptionService {
     }
 
     public List<ProductImage> processUploadImage (List<MultipartFile> images, String color, Product product) {
-        if (images.isEmpty()) throw new AppException(HttpStatus.BAD_REQUEST.value(), "images is empty");
+        if (images == null || images.isEmpty()) throw new AppException(HttpStatus.BAD_REQUEST.value(), "images is empty");
         List<ProductImage> imageList = new ArrayList<>();
         for (int i = 0; i < images.size(); i++) {
             try {
@@ -114,17 +115,26 @@ public class ProductOptionService implements IProductOptionService {
     }
 
     @Override
-    public ResponseEntity<?> updateOption(String id, ProductOptionReq req) {
-        Optional<ProductOption> productOption = productOptionRepository.findById(id);
+    public ResponseEntity<?> updateOptionVariant(String id, String variantColor, ProductOptionReq req) {
+        Optional<ProductOption> productOption = productOptionRepository.findByIdAndVariantColor(id, variantColor);
         if (productOption.isPresent()) {
             productOption.get().setName(req.getName());
             productOption.get().setExtraFee(req.getExtraFee());
+            productOption.get().getVariants().forEach(variant -> {
+                variant.setColor(req.getColor());
+                variant.setStock(req.getStock());
+                List<ProductImage> images = productImageRepository.findAllByColorAndProduct_Id(
+                        variant.getColor(), new ObjectId(productOption.get().getProduct().getId()));
+                variant.setImages(images);
+            });
             try {
                 productOptionRepository.save(productOption.get());
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject(true, "Update product option success", productOption.get()));
             } catch (Exception e) {
                 log.error(e.getMessage());
+                throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "Error when update option");
             }
-
 
         } throw new NotFoundException("Can not found product option with id: "+id);
     }

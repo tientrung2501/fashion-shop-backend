@@ -7,5 +7,5 @@ public interface IProductOptionService {
     ResponseEntity<?> addOption(String productId ,ProductOptionReq req);
     ResponseEntity<?> findOptionById(String id);
     ResponseEntity<?> findOptionByProductId(String id);
-    ResponseEntity<?> updateOption(String id, ProductOptionReq req);
+    ResponseEntity<?> updateOptionVariant(String id, String varientId, ProductOptionReq req);
 }

@@ -1,7 +1,6 @@
 package com.capstone.fashionshop.models.entities.product;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,6 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ProductVariant {
     private UUID id;
+    @NotBlank(message = "Color is required")
     private String color;
     @NotBlank(message = "Stock is required")
     private Long stock;
