@@ -1,5 +1,6 @@
 package com.capstone.fashionshop.models.entities;
 
+import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.models.enums.EGender;
 import com.capstone.fashionshop.models.enums.EProvider;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -8,14 +9,17 @@ import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Document(collection = "users")
 @Data
@@ -44,6 +48,10 @@ public class User {
     private EProvider provider;
     @NotBlank(message = "State is required")
     private String state;
+    @ReadOnlyProperty
+    @DocumentReference(lookup="{'user':?#{#self._id} }")
+    @JsonIgnore
+    private List<Order> orders;
     @CreatedDate
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     LocalDateTime createdDate;

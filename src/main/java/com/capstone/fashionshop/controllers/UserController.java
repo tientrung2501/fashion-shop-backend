@@ -39,7 +39,7 @@ public class UserController {
                                          @PathVariable("userId") String userId,
                                          HttpServletRequest request){
         User user = jwtUtils.getUserFromJWT(jwtUtils.getJwtFromHeader(request));
-        if (user.getId().equals(userId))
+        if (user.getId().equals(userId) || !user.getId().isBlank())
             return userService.updateUser(userId, req);
         throw new AppException(HttpStatus.FORBIDDEN.value(), "You don't have permission! Token is invalid");
     }
@@ -49,7 +49,7 @@ public class UserController {
                                          HttpServletRequest request,
                                          @RequestParam MultipartFile file){
         User user = jwtUtils.getUserFromJWT(jwtUtils.getJwtFromHeader(request));
-        if (user.getId().equals(userId))
+        if (user.getId().equals(userId) || !user.getId().isBlank())
             return userService.updateUserAvatar(userId, file);
         throw new AppException(HttpStatus.FORBIDDEN.value(), "You don't have permission! Token is invalid");
     }
