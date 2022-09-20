@@ -8,6 +8,7 @@ import com.capstone.fashionshop.mapper.UserMapper;
 import com.capstone.fashionshop.models.entities.User;
 import com.capstone.fashionshop.models.enums.EGender;
 import com.capstone.fashionshop.payload.ResponseObject;
+import com.capstone.fashionshop.payload.request.ChangePasswordReq;
 import com.capstone.fashionshop.payload.request.UserReq;
 import com.capstone.fashionshop.payload.response.UserRes;
 import com.capstone.fashionshop.repository.UserRepository;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +35,7 @@ public class UserService implements IUserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final CloudinaryConfig cloudinary;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public ResponseEntity<?> findAll(Pageable pageable) {
@@ -116,6 +119,23 @@ public class UserService implements IUserService {
             userRepository.save(user.get());
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Delete user success", ""));
+        }
+        throw new NotFoundException("Can not found user with id " + id + " is activated");
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<?> updatePassword(String id, ChangePasswordReq req) {
+        Optional<User> user = userRepository.findUserByIdAndState(id, Constants.USER_STATE_ACTIVATED);
+        if (user.isPresent()) {
+            if (passwordEncoder.matches(req.getOldPassword(), user.get().getPassword())
+            && !req.getNewPassword().equals(req.getOldPassword())) {
+                user.get().setPassword(passwordEncoder.encode(req.getNewPassword()));
+                userRepository.save(user.get());
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject(true, "Change password success", ""));
+            } else throw new AppException(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Your old password is wrong" +
+                    " or same with new password");
         }
         throw new NotFoundException("Can not found user with id " + id + " is activated");
     }

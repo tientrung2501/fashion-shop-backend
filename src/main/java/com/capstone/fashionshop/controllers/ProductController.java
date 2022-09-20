@@ -28,47 +28,47 @@ public class ProductController {
         return productService.findByCategoryIdAndBrandId(id, pageable);
     }
 
-    @GetMapping(path = "/admin/products")
+    @GetMapping(path = "/manage/products")
     public ResponseEntity<?> findAll (@ParameterObject Pageable pageable){
         return productService.findAll(pageable);
     }
 
-    @PostMapping("/admin/products")
+    @PostMapping("/manage/products")
     public ResponseEntity<?> addProduct(@Valid @RequestBody ProductReq req) {
         return productService.addProduct(req);
     }
 
-    @PutMapping("/admin/products/{id}")
+    @PutMapping("/manage/products/{id}")
     public ResponseEntity<?> updateProduct(@PathVariable("id") String id,
                                            @Valid @RequestBody ProductReq req) {
         return productService.updateProduct(id, req);
     }
 
-    @DeleteMapping("/admin/products/{id}")
+    @DeleteMapping("/manage/products/{id}")
     public ResponseEntity<?> deleteProduct(@PathVariable("id") String id) {
         return productService.deactivatedProduct(id);
     }
 
-    @DeleteMapping("/admin/products/destroy/{id}")
+    @DeleteMapping("/manage/products/destroy/{id}")
     public ResponseEntity<?> destroyProduct(@PathVariable("id") String id) {
         return productService.destroyProduct(id);
     }
 
-    @PostMapping("/admin/products/attribute/{productId}")
+    @PostMapping("/manage/products/attribute/{productId}")
     public ResponseEntity<?> addAttribute(@PathVariable("productId") String id ,
                                           @Valid @RequestBody ProductAttribute req) {
         return productService.addAttribute(id, req);
     }
 
-    @PutMapping("/admin/products/attribute/{productId}")
+    @PutMapping("/manage/products/attribute/{productId}")
     public ResponseEntity<?> updateAttribute(@PathVariable("productId") String id,
                                            @Valid @RequestBody ProductAttribute req) {
         return productService.updateAttribute(id, req);
     }
 
-    @DeleteMapping("/admin/products/attribute/{productId}")
+    @DeleteMapping("/manage/products/attribute/{productId}")
     public ResponseEntity<?> deleteAttribute(@PathVariable("productId") String id,
-                                             @Valid @RequestBody String name) {
-        return productService.deleteAttribute(id, name);
+                                             @RequestBody ProductAttribute req) {
+        return productService.deleteAttribute(id, req.getName());
     }
 }

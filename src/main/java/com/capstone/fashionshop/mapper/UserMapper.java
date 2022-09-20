@@ -56,7 +56,7 @@ public class UserMapper {
             }
             return new User(req.getName(), req.getEmail(), req.getPassword(), req.getPhone(),
                     req.getAddress(), Constants.ROLE_USER, null,
-                    gender, Constants.USER_STATE_ACTIVATED, EProvider.LOCAL);
+                    gender, Constants.USER_STATE_UNVERIFIED, EProvider.LOCAL);
         }
         return null;
     }

@@ -72,10 +72,12 @@ public class WebSecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests().antMatchers(ALLOWED_LIST_URLS).permitAll().and()
                 .authorizeRequests().antMatchers(HttpMethod.GET, ALLOWED_GET_LIST_URLS).permitAll().and()
-                .authorizeRequests().antMatchers("/api/admin/**")
+                .authorizeRequests().antMatchers("/api/admin/manage/**")
                 .hasAuthority(Constants.ROLE_ADMIN).and()
+                .authorizeRequests().antMatchers("/api/manage/**")
+                .hasAnyAuthority(Constants.ROLE_STAFF, Constants.ROLE_ADMIN).and()
                 .authorizeRequests().antMatchers("/api/**")
-                .hasAnyAuthority(Constants.ROLE_USER, Constants.ROLE_ADMIN)
+                .hasAnyAuthority(Constants.ROLE_USER,Constants.ROLE_STAFF, Constants.ROLE_ADMIN)
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
@@ -84,8 +86,6 @@ public class WebSecurityConfig {
                 .and()
                 .successHandler(successHandler)
                 .failureHandler(authenticationFailureHandler());
-
-
 
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

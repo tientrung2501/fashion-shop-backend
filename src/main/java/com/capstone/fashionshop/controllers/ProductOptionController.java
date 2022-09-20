@@ -15,13 +15,13 @@ import javax.validation.Valid;
 public class ProductOptionController {
     private IProductOptionService productOptionService;
 
-    @PostMapping(value = "/admin/products/option/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/manage/products/option/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addOption(@PathVariable("productId") String id,
                                         @Valid @ModelAttribute ProductOptionReq req) {
         return productOptionService.addOption(id, req);
     }
 
-    @PutMapping(value = "/admin/products/option/{id}")
+    @PutMapping(value = "/manage/products/option/{id}")
     public ResponseEntity<?> updateOptionVariant(@PathVariable("id") String id,
                                                  @RequestParam("variantColor") String variantColor,
                                                  @Valid @RequestBody ProductOptionReq req) {

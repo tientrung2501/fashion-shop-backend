@@ -2,6 +2,7 @@ package com.capstone.fashionshop.controllers;
 
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.models.entities.User;
+import com.capstone.fashionshop.payload.request.ChangePasswordReq;
 import com.capstone.fashionshop.payload.request.UserReq;
 import com.capstone.fashionshop.security.jwt.JwtUtils;
 import com.capstone.fashionshop.services.user.IUserService;
@@ -24,12 +25,12 @@ public class UserController {
     private final IUserService userService;
     private final JwtUtils jwtUtils;
 
-    @GetMapping(path = "/admin/users")
+    @GetMapping(path = "/admin/manage/users")
     public ResponseEntity<?> findAll (@PageableDefault(size = 5) @ParameterObject Pageable pageable){
         return userService.findAll(pageable);
     }
 
-    @DeleteMapping(path = "/admin/users/{userId}")
+    @DeleteMapping(path = "/admin/manage/users/{userId}")
     public ResponseEntity<?> deactivatedUser (@PathVariable("userId") String userId){
         return userService.deactivatedUser(userId);
     }
@@ -41,6 +42,16 @@ public class UserController {
         User user = jwtUtils.getUserFromJWT(jwtUtils.getJwtFromHeader(request));
         if (user.getId().equals(userId) || !user.getId().isBlank())
             return userService.updateUser(userId, req);
+        throw new AppException(HttpStatus.FORBIDDEN.value(), "You don't have permission! Token is invalid");
+    }
+
+    @PutMapping(path = "/users/password/{userId}")
+    public ResponseEntity<?> updatePasswordUser (@Valid @RequestBody ChangePasswordReq req,
+                                         @PathVariable("userId") String userId,
+                                         HttpServletRequest request){
+        User user = jwtUtils.getUserFromJWT(jwtUtils.getJwtFromHeader(request));
+        if (user.getId().equals(userId) || !user.getId().isBlank())
+            return userService.updatePassword(userId, req);
         throw new AppException(HttpStatus.FORBIDDEN.value(), "You don't have permission! Token is invalid");
     }
 

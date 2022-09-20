@@ -28,29 +28,29 @@ public class CategoryController {
         return categoryService.findCategoryById(id);
     }
 
-    @GetMapping(path = "/admin/categories")
+    @GetMapping(path = "/admin/manage/categories")
     public ResponseEntity<?> findAll (){
         return categoryService.findAll();
     }
 
-    @PostMapping(path = "/admin/categories", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(path = "/admin/manage/categories", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addCategory (@ModelAttribute @Valid CategoryReq req){
         return categoryService.addCategory(req);
     }
 
-    @PutMapping(path = "/admin/categories/{id}")
+    @PutMapping(path = "/admin/manage/categories/{id}")
     public ResponseEntity<?> updateCategory (@PathVariable("id") String id,
                                              @RequestBody @Valid CategoryReq req){
         return categoryService.updateCategory(id, req);
     }
 
-    @PostMapping(path = "/admin/categories/image/{id}")
+    @PostMapping(path = "/admin/manage/categories/image/{id}")
     public ResponseEntity<?> updateCategory (@PathVariable("id") String id,
                                              @RequestParam(value = "file") MultipartFile file){
         return categoryService.updateCategoryImage(id, file);
     }
 
-    @DeleteMapping(path = "/admin/categories/{id}")
+    @DeleteMapping(path = "/admin/manage/categories/{id}")
     public ResponseEntity<?> deleteCategory (@PathVariable("id") String id){
         return categoryService.deactivatedCategory(id);
     }

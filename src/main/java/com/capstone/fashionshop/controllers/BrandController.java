@@ -26,14 +26,14 @@ public class BrandController {
         return brandService.findBrandById(id);
     }
 
-    @PostMapping(path = "/admin/brands", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(path = "/admin/manage/brands", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addBrand (@RequestParam(value = "name") String name,
                                           @RequestParam(value = "file",required = false) MultipartFile file){
         if (name == null || name.isBlank()) throw new AppException(HttpStatus.BAD_REQUEST.value(), "Name is required");
         return brandService.addBrand(name, file);
     }
 
-    @PostMapping(path = "/admin/brands/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(path = "/admin/manage/brands/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateBrand (@PathVariable("id") String id,
                                           @RequestParam("name") String name,
                                           @RequestParam(value = "file",required = false) MultipartFile file) {
@@ -41,7 +41,7 @@ public class BrandController {
         return brandService.updateBrand(id, name, file);
     }
 
-    @DeleteMapping(path = "/admin/brands/{id}")
+    @DeleteMapping(path = "/admin/manage/brands/{id}")
     public ResponseEntity<?> deleteBrand (@PathVariable("id") String id){
         return brandService.deactivatedBrand(id);
     }

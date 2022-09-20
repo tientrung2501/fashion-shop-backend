@@ -5,16 +5,12 @@ import com.capstone.fashionshop.mapper.UserMapper;
 import com.capstone.fashionshop.models.entities.User;
 import com.capstone.fashionshop.models.enums.EGender;
 import com.capstone.fashionshop.models.enums.EProvider;
-import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.payload.response.LoginRes;
 import com.capstone.fashionshop.repository.UserRepository;
 import com.capstone.fashionshop.security.jwt.JwtUtils;
 import com.capstone.fashionshop.security.oauth.CustomOAuth2User;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.EnumUtils;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -38,9 +34,9 @@ public class Success extends SavedRequestAwareAuthenticationSuccessHandler {
         EProvider provider = EProvider.valueOf(oauth2User.getOauth2ClientName().toUpperCase());
 
         Optional<User> user = userRepository.findUserByEmailAndState(oauth2User.getEmail(), Constants.USER_STATE_ACTIVATED);
-        ResponseEntity<ResponseObject> res;
         if (user.isEmpty()) {
-            res = processAddUser(oauth2User, provider);
+            String accessToken = processAddUser(oauth2User, provider);
+            response.sendRedirect(generateRedirectURL(true, accessToken, provider, ""));
         } else {
             try {
                 if (EnumUtils.isValidEnum(EProvider.class, user.get().getProvider().name()) &&
@@ -49,27 +45,19 @@ public class Success extends SavedRequestAwareAuthenticationSuccessHandler {
                     String accessToken = jwtUtil.generateTokenFromUserId(user.get());
                     LoginRes userLoginRes = userMapper.toLoginRes(user.get());
                     userLoginRes.setAccessToken(accessToken);
-                    res = ResponseEntity.status(HttpStatus.OK).body(
-                            new ResponseObject(true, "Login successful with google", userLoginRes)
-                    );
-                } else res = ResponseEntity.status(HttpStatus.CONFLICT).body(
-                        new ResponseObject(false, "Your email already have an account with other method", "")
-                );
+                    response.sendRedirect(generateRedirectURL(true, accessToken, provider, ""));
+                } else response.sendRedirect(generateRedirectURL(false, "",
+                        user.get().getProvider(), user.get().getEmail() + " already have an account with +"+
+                                user.get().getProvider() +" method"));
             } catch (NullPointerException e) {
-                res = ResponseEntity.status(HttpStatus.CONFLICT).body(
-                        new ResponseObject(false, "Your email already have an account", e.getMessage())
-                );
+                response.sendRedirect(generateRedirectURL(false, "",
+                        user.get().getProvider(), user.get().getEmail() + " already have an account with +"+
+                                user.get().getProvider() +" method"));
             }
         }
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = objectMapper.writeValueAsString(res);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(json);
     }
 
-    public ResponseEntity<ResponseObject> processAddUser(CustomOAuth2User oAuth2User, EProvider provider) {
+    public String processAddUser(CustomOAuth2User oAuth2User, EProvider provider) {
         User newUser = new User(oAuth2User.getName(), oAuth2User.getEmail(), "",
                 "", "", Constants.ROLE_USER, oAuth2User.getProfilePicture(), EGender.OTHER,
                 Constants.USER_STATE_ACTIVATED, provider);
@@ -77,9 +65,12 @@ public class Success extends SavedRequestAwareAuthenticationSuccessHandler {
         String accessToken = jwtUtil.generateTokenFromUserId(newUser);
         LoginRes res = userMapper.toLoginRes(newUser);
         res.setAccessToken(accessToken);
+        return accessToken;
+    }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                new ResponseObject(true, "Login and create user successful with google", res)
-        );
+    public String generateRedirectURL(Boolean success, String token, EProvider provider, String message) {
+        logger.debug(message);
+        String CLIENT_HOST_REDIRECT = "http://localhost:3000/oauth2/redirect?token=";
+        return CLIENT_HOST_REDIRECT + token + "&success=" + success + "&provider=" + provider.toString();
     }
 }

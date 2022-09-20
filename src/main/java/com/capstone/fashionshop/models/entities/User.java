@@ -52,6 +52,8 @@ public class User {
     @DocumentReference(lookup="{'user':?#{#self._id} }")
     @JsonIgnore
     private List<Order> orders;
+    @JsonIgnore
+    private Token token;
     @CreatedDate
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     LocalDateTime createdDate;

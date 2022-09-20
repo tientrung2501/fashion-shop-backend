@@ -211,7 +211,7 @@ public class ProductService implements IProductService {
     @Override
     public ResponseEntity<?> deleteAttribute(String id, String name) {
         Optional<Product> product = productRepository.findProductByIdAndState(id, Constants.ENABLE);
-        if (product.isPresent()) {
+        if (product.isPresent() && !name.isBlank()) {
             product.get().getAttr().removeIf(a -> a.getName().equals(name));
             productRepository.save(product.get());
             return ResponseEntity.status(HttpStatus.OK).body(
