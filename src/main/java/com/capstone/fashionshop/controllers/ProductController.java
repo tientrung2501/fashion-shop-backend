@@ -6,6 +6,7 @@ import com.capstone.fashionshop.services.product.IProductService;
 import lombok.AllArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,13 @@ public class ProductController {
     @GetMapping(path = "/products/category/{id}")
     public ResponseEntity<?> findByCategoryIdAndBrandId (@PathVariable("id") String id,
                                                          @ParameterObject Pageable pageable){
-        return productService.findByCategoryIdAndBrandId(id, pageable);
+        return productService.findByCategoryIdOrBrandId(id, pageable);
+    }
+
+    @GetMapping(path = "/products/search")
+    public ResponseEntity<?> search (@RequestParam("q") String query,
+                                                         @PageableDefault(sort = "score") @ParameterObject Pageable pageable){
+        return productService.search(query, pageable);
     }
 
     @GetMapping(path = "/manage/products")

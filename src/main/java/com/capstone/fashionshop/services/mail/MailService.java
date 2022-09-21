@@ -25,7 +25,7 @@ public class MailService {
 
     final String AUTH_TEMPLATE = "auth-template.ftl";
     final String ORDER_TEMPLATE = "order-template.ftl";
-    final String FROM_EMAIL = "fsshopmail01@gmail.com";
+    final String FROM_EMAIL = "fsshopmail011@gmail.com";
     final String TYPE_EMAIL = "text/html";
     final String TITLE_EMAIL_AUTH = "Mã xác minh Fashion Store Website";
     final String TITLE_EMAIL_ORDER = "Xác nhận đơn hàng tại Fashion Store Website";

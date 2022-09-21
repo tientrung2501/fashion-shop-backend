@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.query.TextCriteria;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -60,11 +61,16 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public ResponseEntity<?> findByCategoryIdAndBrandId(String id, Pageable pageable) {
+    public ResponseEntity<?> findByCategoryIdOrBrandId(String id, Pageable pageable) {
         List<Product> products;
         try {
-            products = productRepository.findAllByCategory_IdOrBrand_IdAndState(new ObjectId(id),
-                    new ObjectId(id),Constants.ENABLE, pageable);
+            Optional<Category> category = categoryRepository.findCategoryByIdAndState(id, Constants.ENABLE);
+            if (category.isPresent()) {
+                List<ObjectId> subCat = category.get().getSubCategories().stream().map(c -> new ObjectId(c.getId())).collect(Collectors.toList());
+                products = productRepository.findProductsByCategory(new ObjectId(id),
+                        subCat, pageable);
+            } else products = productRepository.findAllByCategory_IdOrBrand_IdAndState(new ObjectId(id),
+                      new ObjectId(id),Constants.ENABLE, pageable);
         } catch (Exception e) {
             throw new AppException(HttpStatus.BAD_REQUEST.value(), "Error when finding");
         }
@@ -77,7 +83,14 @@ public class ProductService implements IProductService {
 
     @Override
     public ResponseEntity<?> search(String key, Pageable pageable) {
-        return null;
+        Page<Product> products = productRepository.findAllBy(TextCriteria
+                .forDefaultLanguage().matchingAny(key),
+                pageable);
+        List<ProductListRes> resList = products.getContent().stream().map(productMapper::toProductListRes).collect(Collectors.toList());
+        if (resList.size() >0 )
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Search "+key+" success", resList));
+        throw new NotFoundException("Can not found any product with: "+key);
     }
 
     @Override

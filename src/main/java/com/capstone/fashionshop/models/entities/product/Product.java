@@ -12,8 +12,10 @@ import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
+import org.springframework.data.mongodb.core.mapping.TextScore;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -26,13 +28,18 @@ import java.util.List;
 @Getter@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+//@CompoundIndexes({
+//        @CompoundIndex(def = "{'category.name' : 'text', 'brand.name' : 'text', 'productOptions.name':'text'}")
+//})
 public class Product {
     @Id
     private String id;
     @NotBlank(message = "Name is required")
     @Indexed(unique = true)
+    @TextIndexed(weight = 10)
     private String name;
     @NotBlank(message = "Description is required")
+    @TextIndexed(weight = 1)
     private String description;
     @NotNull(message = "Price is required")
     private BigDecimal price;
@@ -46,6 +53,7 @@ public class Product {
     @DocumentReference
     private Brand brand;
     private String url;
+    @TextIndexed(weight = 8)
     private List<ProductAttribute> attr = new ArrayList<>();
     @NotBlank(message = "State is required")
     private String state;
@@ -61,6 +69,8 @@ public class Product {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @LastModifiedDate
     LocalDateTime lastModifiedDate;
+    @TextScore
+    Float score;
 
     public Product(String name, String description, BigDecimal price, Category category, Brand brand, String state, int discount) {
         this.name = name;

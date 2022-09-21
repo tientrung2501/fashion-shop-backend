@@ -18,6 +18,7 @@ import com.capstone.fashionshop.services.mail.EMailType;
 import com.capstone.fashionshop.services.mail.MailService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,6 +39,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class AuthService implements IAuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
@@ -95,6 +97,8 @@ public class AuthService implements IAuthService {
                 return ResponseEntity.status(HttpStatus.OK).body(
                         new ResponseObject(true, "Send email reset password success", email));
             } catch (Exception e) {
+                e.printStackTrace();
+                log.error(e.getMessage());
                 throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "Failed to send reset email");
             }
         } throw new  NotFoundException("Can not found user with email " + email + " is activated");

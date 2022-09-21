@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
@@ -21,6 +22,7 @@ public class ProductOption {
     @Id
     private String id;
     @NotBlank(message = "Name is required")
+    @TextIndexed(weight = 9)
     private String name;
     private List<ProductVariant> variants = new ArrayList<>();
     private BigDecimal extraFee;

@@ -85,8 +85,6 @@ public class CategoryService implements ICategoryService {
                 new ResponseObject(true, "create category success", category));
     }
 
-
-
     @Override
     @Transactional
     public ResponseEntity<?> updateCategory(String id, CategoryReq req) {

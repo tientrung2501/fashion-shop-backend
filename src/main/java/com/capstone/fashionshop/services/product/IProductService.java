@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 public interface IProductService {
     ResponseEntity<?> findAll(Pageable pageable);
     ResponseEntity<?> findById(String id);
-    ResponseEntity<?> findByCategoryIdAndBrandId(String catId, Pageable pageable);
+    ResponseEntity<?> findByCategoryIdOrBrandId(String catId, Pageable pageable);
     ResponseEntity<?> search(String key, Pageable pageable);
     ResponseEntity<?> addProduct(ProductReq req);
     ResponseEntity<?> updateProduct(String id, ProductReq req);

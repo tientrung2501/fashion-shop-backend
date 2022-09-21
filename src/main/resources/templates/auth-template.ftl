@@ -106,8 +106,7 @@
 
 <!-- start preheader -->
 <div class="preheader" style="display: none; max-width: 0; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #fff; opacity: 0;">
-    A preheader is the short summary text that follows the subject line when an email is viewed in the inbox.
-</div>
+    Mã xác minh bạn cần dùng để truy cập vào Tài khoản Website của mình (${email})</div>
 <!-- end preheader -->
 
 <!-- start body -->
