@@ -11,7 +11,6 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class VerifyOTPReq {
     @NotBlank(message = "OTP is required")
-    @Size( min = 6, max = 6)
     private String otp;
     @NotBlank(message = "Email is required")
     @Size( min = 5, max = 50)

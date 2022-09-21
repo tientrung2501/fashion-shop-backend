@@ -132,6 +132,8 @@ public class AuthService implements IAuthService {
                     LocalDateTime.now().isBefore(user.get().getToken().getExp())) {
                 res.put("id", user.get().getId());
                 res.put("token", jwtUtils.generateTokenFromUserId(user.get()));
+                user.get().setToken(null);
+                userRepository.save(user.get());
                 verify = true;
             }
             return ResponseEntity.status(HttpStatus.OK).body(
