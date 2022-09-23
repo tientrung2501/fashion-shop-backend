@@ -43,7 +43,7 @@ public class CloudinaryConfig {
                 "folder", "fashion"
         );
         Map map = cloudinary().uploader().upload(ImageUtils.convertMultiPartToFile(file),params);
-        if (urlDestroy!= null) {
+        if (urlDestroy!= null && urlDestroy.startsWith("https://res.cloudinary.com/dmlt1eshx/image/upload")) {
             deleteImage(urlDestroy);
         }
         ImageUtils.deleteMultipartFile(ImageUtils.convertMultiPartToFile(file));
