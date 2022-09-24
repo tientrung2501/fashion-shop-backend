@@ -13,5 +13,6 @@ public interface IUserService {
     ResponseEntity<?> updatePassword(String id, ChangePasswordReq req);
     ResponseEntity<?> updateUserAvatar(String id, MultipartFile file);
     ResponseEntity<?> deactivatedUser(String id);
+    ResponseEntity<?> updatePasswordReset(String id, ChangePasswordReq req);
 
 }

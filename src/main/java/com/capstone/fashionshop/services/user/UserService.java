@@ -139,4 +139,20 @@ public class UserService implements IUserService {
         }
         throw new NotFoundException("Can not found user with id " + id + " is activated");
     }
+
+    @Override
+    @Transactional
+    public ResponseEntity<?> updatePasswordReset(String id, ChangePasswordReq req) {
+        Optional<User> user = userRepository.findUserByIdAndState(id, Constants.USER_STATE_ACTIVATED);
+        if (user.isPresent()) {
+            if (req.getOldPassword().equals(user.get().getToken().getOtp())) {
+                user.get().setPassword(passwordEncoder.encode(req.getNewPassword()));
+                user.get().setToken(null);
+                userRepository.save(user.get());
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject(true, "Change password success", ""));
+            } else throw new AppException(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Your otp is wrong");
+        }
+        throw new NotFoundException("Can not found user with id " + id + " is activated");
+    }
 }
