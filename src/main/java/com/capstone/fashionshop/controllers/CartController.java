@@ -5,6 +5,7 @@ import com.capstone.fashionshop.models.entities.User;
 import com.capstone.fashionshop.payload.request.CartReq;
 import com.capstone.fashionshop.security.jwt.JwtUtils;
 import com.capstone.fashionshop.services.cart.ICartService;
+import com.capstone.fashionshop.utils.MoneyUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,15 +13,17 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.io.IOException;
+import java.math.BigDecimal;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/cart")
 public class CartController {
     private final ICartService cartService;
     private final JwtUtils jwtUtils;
 
-    @GetMapping(path = "/cart")
+    @GetMapping(path = "")
     public ResponseEntity<?> getProductFromCart (HttpServletRequest request){
         User user = jwtUtils.getUserFromJWT(jwtUtils.getJwtFromHeader(request));
         if (!user.getId().isBlank())
@@ -28,7 +31,7 @@ public class CartController {
         throw new AppException(HttpStatus.FORBIDDEN.value(), "You don't have permission! Token is invalid");
     }
 
-    @PostMapping(path = "/cart")
+    @PostMapping(path = "")
     public ResponseEntity<?> addAndUpdateProduct (@RequestBody @Valid CartReq req,
                                                   HttpServletRequest request){
         User user = jwtUtils.getUserFromJWT(jwtUtils.getJwtFromHeader(request));
@@ -37,7 +40,7 @@ public class CartController {
         throw new AppException(HttpStatus.FORBIDDEN.value(), "You don't have permission! Token is invalid");
     }
 
-    @DeleteMapping(path = "/cart/{orderItemId}")
+    @DeleteMapping(path = "/{orderItemId}")
     public ResponseEntity<?> deleteProductInCart (@PathVariable("orderItemId") String orderItemId,
                                                   HttpServletRequest request){
         User user = jwtUtils.getUserFromJWT(jwtUtils.getJwtFromHeader(request));

@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface OrderRepository extends MongoRepository<Order, String> {
     Optional<Order> findOrderByUser_IdAndState(ObjectId userId, String state);
     List<Order> findAllByState(String state);
+    Optional<Order> findOrderByPaymentDetail_PaymentTokenAndState(String token, String state);
 }

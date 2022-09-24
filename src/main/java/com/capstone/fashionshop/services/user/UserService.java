@@ -144,7 +144,7 @@ public class UserService implements IUserService {
     @Transactional
     public ResponseEntity<?> updatePasswordReset(String id, ChangePasswordReq req) {
         Optional<User> user = userRepository.findUserByIdAndState(id, Constants.USER_STATE_ACTIVATED);
-        if (user.isPresent()) {
+        if (user.isPresent() && user.get().getToken() != null) {
             if (req.getOldPassword().equals(user.get().getToken().getOtp())) {
                 user.get().setPassword(passwordEncoder.encode(req.getNewPassword()));
                 user.get().setToken(null);

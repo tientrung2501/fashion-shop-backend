@@ -51,8 +51,10 @@ public class WebSecurityConfig {
             "/webjars/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "/ws/**"
-
+            "/ws/**",
+            //Paypal
+            "/api/checkout/*/success",
+            "/api/checkout/*/cancel"
     };
 
     private final String[] ALLOWED_GET_LIST_URLS = {
