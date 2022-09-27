@@ -4,9 +4,12 @@ import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.exception.NotFoundException;
 import com.capstone.fashionshop.models.entities.User;
+import com.capstone.fashionshop.models.entities.order.DeliveryDetail;
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.models.entities.order.PaymentDetail;
+import com.capstone.fashionshop.payload.request.CheckoutReq;
 import com.capstone.fashionshop.repository.OrderRepository;
+import com.capstone.fashionshop.repository.UserRepository;
 import com.capstone.fashionshop.security.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +33,7 @@ public class PaymentService {
     private final ApplicationContext context;
     private final OrderRepository orderRepository;
     private final JwtUtils jwtTokenUtil;
+    private final UserRepository userRepository;
 
     public PaymentFactory getPaymentMethod(String methodName) {
         switch (methodName) {
@@ -41,7 +45,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public ResponseEntity<?> createPayment(HttpServletRequest request, String id, String paymentType) {
+    public ResponseEntity<?> createPayment(HttpServletRequest request, String id, String paymentType, CheckoutReq req) {
         String user_id = jwtTokenUtil.getUserFromJWT(jwtTokenUtil.getJwtFromHeader(request)).getId();
         if (user_id.isBlank()) throw new AppException(HttpStatus.BAD_REQUEST.value(), "Token is invalid");
         Optional<Order> order;
@@ -50,8 +54,10 @@ public class PaymentService {
             if (order.isEmpty() || !order.get().getId().equals(id)) {
                 throw new NotFoundException("Can not found any order with id: " + id);
             }
-            PaymentDetail paymentDetail = new PaymentDetail(paymentType.toUpperCase(),"");
+            PaymentDetail paymentDetail = new PaymentDetail(paymentType.toUpperCase(),"", null);
             order.get().setPaymentDetail(paymentDetail);
+            DeliveryDetail deliveryDetail = new DeliveryDetail(req.getName(), req.getPhone(), req.getAddress());
+            order.get().setDeliveryDetail(deliveryDetail);
             order.get().setState(Constants.ORDER_STATE_PROCESS);
             orderRepository.save(order.get());
         } catch (Exception e) {
@@ -67,14 +73,14 @@ public class PaymentService {
                                             String id, HttpServletRequest request, HttpServletResponse response) {
         if (paymentId != null && payerId != null ) {
             PaymentFactory paymentFactory = getPaymentMethod(Constants.PAYMENT_PAYPAL);
-            return paymentFactory.executePayment(paymentId, payerId, null,null, response);
+            return paymentFactory.executePayment(paymentId, payerId, null,null, request, response);
         } else if (responseCode != null) {
             PaymentFactory paymentFactory = getPaymentMethod(Constants.PAYMENT_VNPAY);
-            return paymentFactory.executePayment(null, null, responseCode, id, response);
+            return paymentFactory.executePayment(null, null, responseCode, id, request, response);
         } else {
             checkRoleForCODPayment(request);
             PaymentFactory paymentFactory = getPaymentMethod(Constants.PAYMENT_COD);
-            return paymentFactory.executePayment(paymentId, null, null,null, response);
+            return paymentFactory.executePayment(paymentId, null, null,null, request, response);
         }
     }
 
@@ -95,9 +101,10 @@ public class PaymentService {
     }
 
     private void checkRoleForCODPayment(HttpServletRequest request) {
-        User user = jwtTokenUtil.getUserFromJWT(jwtTokenUtil.getJwtFromHeader(request));
-        if (user == null ||
-                !(user.getRole().equals(Constants.ROLE_ADMIN) || user.getRole().equals(Constants.ROLE_STAFF)))
+        String userId = jwtTokenUtil.getUserFromJWT(jwtTokenUtil.getJwtFromHeader(request)).getId();
+        Optional<User> user = userRepository.findUserByIdAndState(userId, Constants.USER_STATE_ACTIVATED);
+        if (user.isEmpty() ||
+                !(user.get().getRole().equals(Constants.ROLE_ADMIN) || user.get().getRole().equals(Constants.ROLE_STAFF)))
             throw new AppException(HttpStatus.FORBIDDEN.value(), "You don't have permission!");
     }
 }

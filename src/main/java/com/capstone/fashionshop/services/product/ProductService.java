@@ -107,7 +107,7 @@ public class ProductService implements IProductService {
             } catch (Exception e) {
                 throw new AppException(HttpStatus.CONFLICT.value(), "Product name already exists");
             }
-            ProductListRes res = productMapper.toProductListRes(product);
+            ProductRes res = productMapper.toProductRes(product);
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     new ResponseObject(true, "Add product successfully ", res)
             );
@@ -127,7 +127,7 @@ public class ProductService implements IProductService {
             } catch (Exception e) {
                 throw new AppException(HttpStatus.CONFLICT.value(), "Product name already exists");
             }
-            ProductListRes res = productMapper.toProductListRes(product.get());
+            ProductRes res = productMapper.toProductRes(product.get());
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Add product successfully ", res)
             );

@@ -2,6 +2,7 @@ package com.capstone.fashionshop.controllers;
 
 
 import com.capstone.fashionshop.config.Constants;
+import com.capstone.fashionshop.payload.request.CheckoutReq;
 import com.capstone.fashionshop.services.payment.PaymentService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 @RestController
 @AllArgsConstructor
@@ -19,8 +21,9 @@ public class PaymentController {
     @PostMapping(path = "/{paymentType}/{orderId}")
     public ResponseEntity<?> checkout (@PathVariable("paymentType") String paymentType,
                                        @PathVariable("orderId") String orderId,
+                                       @RequestBody @Valid CheckoutReq req,
                                        HttpServletRequest request) {
-        return paymentService.createPayment(request, orderId, paymentType);
+        return paymentService.createPayment(request, orderId, paymentType, req);
     }
 
     @GetMapping("/{paymentType}/success")

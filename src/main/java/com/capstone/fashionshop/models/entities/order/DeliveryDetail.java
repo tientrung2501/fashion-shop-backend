@@ -5,14 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Map;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentDetail {
-    private String paymentType;
-    private String paymentToken;
-    private Map<String, Object> paymentInfo;
+public class DeliveryDetail {
+    private String receiveName;
+    private String receivePhone;
+    private String receiveAddress;
 }
+

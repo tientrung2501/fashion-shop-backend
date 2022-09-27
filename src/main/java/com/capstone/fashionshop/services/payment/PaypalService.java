@@ -72,9 +72,10 @@ public class PaypalService extends PaymentFactory{
 
     @SneakyThrows
     @Override
-    public ResponseEntity<?> executePayment(String paymentId, String payerId, String responseCode, String id, HttpServletResponse response) {
+    public ResponseEntity<?> executePayment(String paymentId, String payerId, String responseCode, String id, HttpServletRequest request, HttpServletResponse response) {
         try {
             Payment payment= execute(paymentId, payerId);
+            System.out.println(payment);
             if (payment.getState().equals("approved")) {
                 String paymentToken = "EC-" + payment.getCart();
                 Optional<Order> order = orderRepository.findOrderByPaymentDetail_PaymentTokenAndState(

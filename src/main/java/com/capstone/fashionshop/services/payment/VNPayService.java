@@ -70,7 +70,7 @@ public class VNPayService extends PaymentFactory {
 
     @SneakyThrows
     @Override
-    public ResponseEntity<?> executePayment(String paymentId, String payerId, String responseCode, String id, HttpServletResponse response) {
+    public ResponseEntity<?> executePayment(String paymentId, String payerId, String responseCode, String id, HttpServletRequest request, HttpServletResponse response) {
         Optional<Order> order = orderRepository.findById(id);
         if (order.isEmpty() || !order.get().getState().equals(Constants.ORDER_STATE_PROCESS))
             throw new NotFoundException("Can not found order with id: " + id);
