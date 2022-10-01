@@ -35,7 +35,7 @@ public class ProductController {
         return productService.search(query, pageable);
     }
 
-    @GetMapping(path = "/manage/products")
+    @GetMapping(path = "/products")
     public ResponseEntity<?> findAll (@ParameterObject Pageable pageable){
         return productService.findAll(pageable);
     }
