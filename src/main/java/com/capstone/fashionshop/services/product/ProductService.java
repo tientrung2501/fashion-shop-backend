@@ -25,7 +25,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -75,9 +77,13 @@ public class ProductService implements IProductService {
             throw new AppException(HttpStatus.BAD_REQUEST.value(), "Error when finding");
         }
         List<ProductListRes> resList = products.stream().map(productMapper::toProductListRes).collect(Collectors.toList());
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("list", resList);
+        resp.put("totalQuantity", resList.size());
+        resp.put("totalPage", resList.size()/ pageable.getPageSize());
         if (resList.size() > 0 )
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject(true, "Get all product success", resList));
+                    new ResponseObject(true, "Get all product success", resp));
         throw new NotFoundException("Can not found any product with category or brand id: "+id);
     }
 
