@@ -64,7 +64,7 @@ public class ProductService implements IProductService {
 
     @Override
     public ResponseEntity<?> findByCategoryIdOrBrandId(String id, Pageable pageable) {
-        List<Product> products;
+        Page<Product> products;
         try {
             Optional<Category> category = categoryRepository.findCategoryByIdAndState(id, Constants.ENABLE);
             if (category.isPresent()) {
@@ -79,8 +79,8 @@ public class ProductService implements IProductService {
         List<ProductListRes> resList = products.stream().map(productMapper::toProductListRes).collect(Collectors.toList());
         Map<String, Object> resp = new HashMap<>();
         resp.put("list", resList);
-        resp.put("totalQuantity", resList.size());
-        resp.put("totalPage", resList.size()/ pageable.getPageSize());
+        resp.put("totalQuantity", products.getTotalElements());
+        resp.put("totalPage", products.getTotalPages());
         if (resList.size() > 0 )
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Get all product success", resp));

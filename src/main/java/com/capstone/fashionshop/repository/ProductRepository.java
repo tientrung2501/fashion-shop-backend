@@ -16,9 +16,9 @@ import java.util.Optional;
 public interface ProductRepository extends MongoRepository<Product, String> {
     boolean existsProductByUrl(String url);
     Optional<Product> findProductByIdAndState(String id, String state);
-    List<Product> findAllByCategory_IdOrBrand_IdAndState(ObjectId catId, ObjectId brandId, String state, Pageable pageable);
+    Page<Product> findAllByCategory_IdOrBrand_IdAndState(ObjectId catId, ObjectId brandId, String state, Pageable pageable);
     @Query(value = "{ $or: [{'category' : ?0},{'category':{$in: ?1}}] ," +
             "    'state' : 'enable'}")
-    List<Product> findProductsByCategory(ObjectId id, List<ObjectId> subCat, Pageable pageable);
+    Page<Product> findProductsByCategory(ObjectId id, List<ObjectId> subCat, Pageable pageable);
     Page<Product> findAllBy(TextCriteria textCriteria, Pageable pageable);
 }
