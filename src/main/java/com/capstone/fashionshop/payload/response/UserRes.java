@@ -10,6 +10,9 @@ public class UserRes {
     private String name;
     private String avatar;
     private String phone;
+    private Integer province;
+    private Integer district;
+    private Integer ward;
     private String address;
     private EGender gender;
     private String role;

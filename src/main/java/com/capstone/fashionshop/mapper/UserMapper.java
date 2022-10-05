@@ -2,7 +2,7 @@ package com.capstone.fashionshop.mapper;
 
 import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
-import com.capstone.fashionshop.models.entities.User;
+import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.models.enums.EGender;
 import com.capstone.fashionshop.models.enums.EProvider;
 import com.capstone.fashionshop.payload.request.RegisterReq;
@@ -40,6 +40,9 @@ public class UserMapper {
             userRes.setGender(user.getGender());
             userRes.setPhone(user.getPhone());
             userRes.setAddress(user.getAddress());
+            userRes.setProvince(user.getProvince());
+            userRes.setDistrict(user.getDistrict());
+            userRes.setWard(user.getWard());
         }
         return userRes;
     }
@@ -55,6 +58,7 @@ public class UserMapper {
                 throw new AppException(400, "Gender is invalid!");
             }
             return new User(req.getName(), req.getEmail(), req.getPassword(), req.getPhone(),
+                    req.getProvince(), req.getDistrict(), req.getWard(),
                     req.getAddress(), Constants.ROLE_USER, null,
                     gender, Constants.USER_STATE_UNVERIFIED, EProvider.LOCAL);
         }

@@ -1,8 +1,9 @@
 package com.capstone.fashionshop.controllers;
 
 import com.capstone.fashionshop.exception.AppException;
-import com.capstone.fashionshop.models.entities.User;
+import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.payload.request.ChangePasswordReq;
+import com.capstone.fashionshop.payload.request.RegisterReq;
 import com.capstone.fashionshop.payload.request.UserReq;
 import com.capstone.fashionshop.security.jwt.JwtUtils;
 import com.capstone.fashionshop.services.user.IUserService;
@@ -28,6 +29,17 @@ public class UserController {
     @GetMapping(path = "/admin/manage/users")
     public ResponseEntity<?> findAll (@PageableDefault(size = 5) @ParameterObject Pageable pageable){
         return userService.findAll(pageable);
+    }
+
+    @PostMapping(path = "/admin/manage/users")
+    public ResponseEntity<?> addUser (@Valid @RequestBody RegisterReq req){
+        return userService.addUser(req);
+    }
+
+    @PutMapping(path = "/admin/manage/users/{userId}")
+    public ResponseEntity<?> updateUserAdmin (@Valid @RequestBody UserReq req,
+                                         @PathVariable("userId") String userId){
+        return userService.updateUser(userId, req);
     }
 
     @DeleteMapping(path = "/admin/manage/users/{userId}")
@@ -76,7 +88,19 @@ public class UserController {
     }
 
     @GetMapping(path = "/users/{userId}")
-    public ResponseEntity<?> findUserById (@PathVariable("userId") String userId){
-        return userService.findUserById(userId);
+    public ResponseEntity<?> findUserById (@PathVariable("userId") String userId,
+                                           HttpServletRequest request) {
+        User user = jwtUtils.getUserFromJWT(jwtUtils.getJwtFromHeader(request));
+        if (user.getId().equals(userId) || !user.getId().isBlank())
+            return userService.findUserById(userId);
+        throw new AppException(HttpStatus.FORBIDDEN.value(), "You don't have permission! Token is invalid");
+    }
+
+    @GetMapping(path = "/users/order/history")
+    public ResponseEntity<?> getUserOrderHistory (HttpServletRequest request){
+        User user = jwtUtils.getUserFromJWT(jwtUtils.getJwtFromHeader(request));
+        if (!user.getId().isBlank())
+            return userService.getUserOrderHistory(user.getId());
+        throw new AppException(HttpStatus.FORBIDDEN.value(), "You don't have permission! Token is invalid");
     }
 }

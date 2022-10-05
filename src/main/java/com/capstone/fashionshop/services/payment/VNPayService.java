@@ -75,6 +75,9 @@ public class VNPayService extends PaymentFactory {
         if (order.isEmpty() || !order.get().getState().equals(Constants.ORDER_STATE_PROCESS))
             throw new NotFoundException("Can not found order with id: " + id);
         if (responseCode.equals(VNPayUtils.responseSuccessCode)) {
+            order.get().getPaymentDetail().getPaymentInfo().put("amount", request.getParameter(VNPayUtils.vnp_Amount));
+            order.get().getPaymentDetail().getPaymentInfo().put("bankCode", request.getParameter("vnp_BankCode"));
+            order.get().getPaymentDetail().getPaymentInfo().put("transactionNo", request.getParameter("vnp_TransactionNo"));
             order.get().setState(Constants.ORDER_STATE_PAID);
             orderRepository.save(order.get());
             response.sendRedirect(PaymentService.CLIENT_REDIRECT + "true&cancel=false");

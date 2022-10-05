@@ -45,10 +45,20 @@ public class ProductService implements IProductService {
     public ResponseEntity<?> findAll(Pageable pageable) {
         Page<Product> products = productRepository.findAll(pageable);
         List<ProductListRes> resList = products.getContent().stream().map(productMapper::toProductListRes).collect(Collectors.toList());
+        ResponseEntity<?> resp = addPageableToRes(products, resList);
+        if (resp != null) return resp;
+        throw new NotFoundException("Can not found any product");
+    }
+
+    private ResponseEntity<?> addPageableToRes(Page<Product> products, List<ProductListRes> resList) {
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("list", resList);
+        resp.put("totalQuantity", products.getTotalElements());
+        resp.put("totalPage", products.getTotalPages());
         if (resList.size() >0 )
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject(true, "Get all product success", resList));
-        throw new NotFoundException("Can not found any product");
+                    new ResponseObject(true, "Get all product success", resp));
+        return null;
     }
 
     @Override
@@ -77,13 +87,8 @@ public class ProductService implements IProductService {
             throw new AppException(HttpStatus.BAD_REQUEST.value(), "Error when finding");
         }
         List<ProductListRes> resList = products.stream().map(productMapper::toProductListRes).collect(Collectors.toList());
-        Map<String, Object> resp = new HashMap<>();
-        resp.put("list", resList);
-        resp.put("totalQuantity", products.getTotalElements());
-        resp.put("totalPage", products.getTotalPages());
-        if (resList.size() > 0 )
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject(true, "Get all product success", resp));
+        ResponseEntity<?> resp = addPageableToRes(products, resList);
+        if (resp != null) return resp;
         throw new NotFoundException("Can not found any product with category or brand id: "+id);
     }
 
@@ -93,9 +98,8 @@ public class ProductService implements IProductService {
                 .forDefaultLanguage().matchingAny(key),
                 pageable);
         List<ProductListRes> resList = products.getContent().stream().map(productMapper::toProductListRes).collect(Collectors.toList());
-        if (resList.size() >0 )
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject(true, "Search "+key+" success", resList));
+        ResponseEntity<?> resp = addPageableToRes(products, resList);
+        if (resp != null) return resp;
         throw new NotFoundException("Can not found any product with: "+key);
     }
 

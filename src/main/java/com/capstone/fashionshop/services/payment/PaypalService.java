@@ -23,9 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -50,13 +48,18 @@ public class PaypalService extends PaymentFactory{
                     "USD",
                     PaypalPaymentMethod.paypal,
                     PaypalPaymentIntent.sale,
-                    "Order in Fashion Website",
+                    "Thanh toan hoa don "+ order.getId(),
                     cancelUrl,
                     successUrl);
             for (Links links : payment.getLinks()) {
                 if (links.getRel().equals("approval_url")) {
                     String checkUpdateQuantityProduct = paymentUtils.checkingUpdateQuantityProduct(order, true);
                     if (checkUpdateQuantityProduct == null) {
+                        Map<String, Object> params = new HashMap<>();
+                        if (!payment.getTransactions().isEmpty())
+                            params.put("amount", payment.getTransactions().get(0).getAmount());
+                        order.getPaymentDetail().setPaymentInfo(params);
+                        order.getPaymentDetail().setPaymentId(payment.getId());
                         order.getPaymentDetail().setPaymentToken((links.getHref().split(PATTERN)[1]));
                         orderRepository.save(order);
                         return ResponseEntity.status(HttpStatus.OK).body(
@@ -75,12 +78,13 @@ public class PaypalService extends PaymentFactory{
     public ResponseEntity<?> executePayment(String paymentId, String payerId, String responseCode, String id, HttpServletRequest request, HttpServletResponse response) {
         try {
             Payment payment= execute(paymentId, payerId);
-            System.out.println(payment);
             if (payment.getState().equals("approved")) {
                 String paymentToken = "EC-" + payment.getCart();
                 Optional<Order> order = orderRepository.findOrderByPaymentDetail_PaymentTokenAndState(
                         paymentToken, Constants.ORDER_STATE_PROCESS);
                 if (order.isPresent()) {
+                    order.get().getPaymentDetail().getPaymentInfo().put("payer", payment.getPayer().getPayerInfo());
+                    order.get().getPaymentDetail().getPaymentInfo().put("paymentMethod", payment.getPayer().getPaymentMethod());
                     order.get().setState(Constants.ORDER_STATE_PAID);
                     orderRepository.save(order.get());
                 }

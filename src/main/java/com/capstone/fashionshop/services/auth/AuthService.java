@@ -4,8 +4,8 @@ import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.exception.NotFoundException;
 import com.capstone.fashionshop.mapper.UserMapper;
-import com.capstone.fashionshop.models.entities.Token;
-import com.capstone.fashionshop.models.entities.User;
+import com.capstone.fashionshop.models.entities.user.Token;
+import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.payload.request.LoginReq;
 import com.capstone.fashionshop.payload.request.RegisterReq;
@@ -78,8 +78,7 @@ public class AuthService implements IAuthService {
         if (user != null) {
             try {
                 sendVerifyMail(user);
-//                userRepository.insert(user);
-            } catch (Exception e){
+            } catch (Exception e) {
                 throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), e.getMessage());
             }
         }
@@ -101,7 +100,8 @@ public class AuthService implements IAuthService {
                 log.error(e.getMessage());
                 throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "Failed to send reset email");
             }
-        } throw new  NotFoundException("Can not found user with email " + email + " is activated");
+        }
+        throw new NotFoundException("Can not found user with email " + email + " is activated");
     }
 
     @SneakyThrows
@@ -117,9 +117,12 @@ public class AuthService implements IAuthService {
     @Override
     public ResponseEntity<?> verifyOTP(VerifyOTPReq req) {
         switch (req.getType().toLowerCase()) {
-            case "register": return verifyRegister(req.getEmail(), req.getOtp());
-            case "reset": return verifyReset(req.getEmail(), req.getOtp());
-            default: throw new NotFoundException("Can not found type of verify");
+            case "register":
+                return verifyRegister(req.getEmail(), req.getOtp());
+            case "reset":
+                return verifyReset(req.getEmail(), req.getOtp());
+            default:
+                throw new NotFoundException("Can not found type of verify");
         }
     }
 
@@ -128,30 +131,46 @@ public class AuthService implements IAuthService {
         if (user.isPresent()) {
             Map<String, Object> res = new HashMap<>();
             boolean verify = false;
-            if (user.get().getToken().getOtp().equals(otp) &&
-                    LocalDateTime.now().isBefore(user.get().getToken().getExp())) {
-                res.put("id", user.get().getId());
-                res.put("token", jwtUtils.generateTokenFromUserId(user.get()));
-                userRepository.save(user.get());
-                verify = true;
-            }
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject(verify, "OTP with email: " + email + " is " + verify, res));
-        } throw new  NotFoundException("Can not found user with email " + email + " is activated");
+                if (LocalDateTime.now().isBefore(user.get().getToken().getExp())) {
+                    if (user.get().getToken().getOtp().equals(otp)) {
+                        res.put("id", user.get().getId());
+                        res.put("token", jwtUtils.generateTokenFromUserId(user.get()));
+                        user.get().setToken(null);
+                        userRepository.save(user.get());
+                        verify = true;
+                    }
+                    return ResponseEntity.status(HttpStatus.OK).body(
+                            new ResponseObject(verify, "OTP with email: " + email + " is " + verify, res));
+                } else {
+                    user.get().setToken(null);
+                    userRepository.save(user.get());
+                    return ResponseEntity.status(HttpStatus.OK).body(
+                            new ResponseObject(false, "OTP with email: " + email + " is expired" , ""));
+                }
+        }
+        throw new NotFoundException("Can not found user with email " + email + " is activated");
     }
 
     private ResponseEntity<?> verifyRegister(String email, String otp) {
         Optional<User> user = userRepository.findUserByEmailAndState(email, Constants.USER_STATE_UNVERIFIED);
         if (user.isPresent()) {
             boolean verify = false;
-            if (user.get().getToken().getOtp().equals(otp) &&
-                    LocalDateTime.now().isBefore(user.get().getToken().getExp())) {
-                user.get().setState(Constants.USER_STATE_ACTIVATED);
+            if (LocalDateTime.now().isBefore(user.get().getToken().getExp())) {
+                if (user.get().getToken().getOtp().equals(otp)) {
+                    user.get().setState(Constants.USER_STATE_ACTIVATED);
+                    user.get().setToken(null);
+                    userRepository.save(user.get());
+                    verify = true;
+                }
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject(verify, "OTP with email: " + email + " is " + verify, ""));
+            } else {
+                user.get().setToken(null);
                 userRepository.save(user.get());
-                verify = true;
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject(false, "OTP with email: " + email + " is expired" , ""));
             }
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject(verify, "OTP with email: " + email + " is " + verify, ""));
-        } throw new  NotFoundException("Can not found user with email " + email);
+        }
+        throw new NotFoundException("Can not found user with email " + email);
     }
 }

@@ -4,12 +4,15 @@ import com.capstone.fashionshop.config.CloudinaryConfig;
 import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.exception.NotFoundException;
+import com.capstone.fashionshop.mapper.CartMapper;
 import com.capstone.fashionshop.mapper.UserMapper;
-import com.capstone.fashionshop.models.entities.User;
+import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.models.enums.EGender;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.payload.request.ChangePasswordReq;
+import com.capstone.fashionshop.payload.request.RegisterReq;
 import com.capstone.fashionshop.payload.request.UserReq;
+import com.capstone.fashionshop.payload.response.CartRes;
 import com.capstone.fashionshop.payload.response.UserRes;
 import com.capstone.fashionshop.repository.UserRepository;
 import com.capstone.fashionshop.utils.StringUtils;
@@ -36,6 +39,7 @@ public class UserService implements IUserService {
     private final UserMapper userMapper;
     private final CloudinaryConfig cloudinary;
     private final PasswordEncoder passwordEncoder;
+    private final CartMapper cartMapper;
 
     @Override
     public ResponseEntity<?> findAll(Pageable pageable) {
@@ -59,6 +63,40 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public ResponseEntity<?> getUserOrderHistory(String id) {
+        Optional<User> user = userRepository.findUserByIdAndState(id, Constants.USER_STATE_ACTIVATED);
+        if (user.isPresent()) {
+            List<CartRes> resList = user.get().getOrders().stream().map(cartMapper::toCartRes).collect(Collectors.toList());
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Get order history of user success", resList));
+        }
+        throw new NotFoundException("Can not found user with id " + id );
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<?> addUser(RegisterReq req) {
+        if (userRepository.existsByEmail(req.getEmail()))
+            throw new AppException(HttpStatus.CONFLICT.value(), "Email already exists");
+        req.setPassword(passwordEncoder.encode(req.getPassword()));
+        User user = userMapper.toUser(req);
+        if (user != null) {
+            if (req.getRole().toUpperCase(Locale.ROOT).equals(Constants.ROLE_STAFF) ||
+                    req.getRole().toUpperCase(Locale.ROOT).equals(Constants.ROLE_USER))
+                user.setRole(req.getRole().toUpperCase());
+            else throw new NotFoundException("Can not found role: "+ req.getRole());
+            try {
+                userRepository.insert(user);
+            } catch (Exception e){
+                throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), e.getMessage());
+            }
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                new ResponseObject(true, "Add user successfully ", "")
+        );
+    }
+
+    @Override
     @Transactional
     public ResponseEntity<?> updateUser(String id, UserReq userReq) {
         Optional<User> user = userRepository.findUserByIdAndState(id, Constants.USER_STATE_ACTIVATED);
@@ -76,6 +114,12 @@ public class UserService implements IUserService {
         if (src != null) {
             if (!src.getName().isBlank())
                 des.setName(src.getName());
+            if (src.getProvince() > 0)
+                des.setProvince(src.getProvince());
+            if (src.getDistrict() > 0)
+                des.setDistrict(src.getDistrict());
+            if (src.getWard() > 0)
+                des.setWard(src.getWard());
             if (!src.getAddress().isBlank())
                 des.setAddress(src.getAddress());
             if (!src.getPhone().isBlank() && StringUtils.isPhoneNumberFormat(src.getPhone()))

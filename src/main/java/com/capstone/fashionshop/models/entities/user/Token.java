@@ -1,4 +1,4 @@
-package com.capstone.fashionshop.models.entities;
+package com.capstone.fashionshop.models.entities.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

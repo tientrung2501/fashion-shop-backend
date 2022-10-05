@@ -1,6 +1,6 @@
 package com.capstone.fashionshop.security.user;
 
-import com.capstone.fashionshop.models.entities.User;
+import com.capstone.fashionshop.models.entities.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;

@@ -12,6 +12,9 @@ import lombok.Setter;
 public class DeliveryDetail {
     private String receiveName;
     private String receivePhone;
+    private String receiveProvince;
+    private String receiveDistrict;
+    private String receiveWard;
     private String receiveAddress;
 }
 

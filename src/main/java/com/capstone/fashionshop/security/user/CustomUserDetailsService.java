@@ -1,10 +1,9 @@
 package com.capstone.fashionshop.security.user;
 
 import com.capstone.fashionshop.config.Constants;
-import com.capstone.fashionshop.models.entities.User;
+import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.repository.UserRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

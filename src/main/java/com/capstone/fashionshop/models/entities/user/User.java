@@ -1,4 +1,4 @@
-package com.capstone.fashionshop.models.entities;
+package com.capstone.fashionshop.models.entities.user;
 
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.models.enums.EGender;
@@ -40,6 +40,9 @@ public class User {
     @JsonIgnore
     private String password;
     private String phone;
+    private int province;
+    private int district;
+    private int ward;
     private String address;
     @NotBlank(message = "Role is required")
     private String role;
@@ -61,11 +64,14 @@ public class User {
     @LastModifiedDate
     LocalDateTime lastModifiedDate;
 
-    public User(String name, String email, String password, String phone, String address, String role, String avatar, EGender gender, String state, EProvider provider) {
+    public User(String name, String email, String password, String phone, Integer province, Integer district, Integer ward, String address, String role, String avatar, EGender gender, String state, EProvider provider) {
         this.name = name;
         this.email = email;
         this.password = password;
         this.phone = phone;
+        this.province = province;
+        this.district = district;
+        this.ward = ward;
         this.address = address;
         this.role = role;
         this.avatar = avatar;

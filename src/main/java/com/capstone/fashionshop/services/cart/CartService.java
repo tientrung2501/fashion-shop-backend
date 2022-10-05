@@ -4,7 +4,7 @@ import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.exception.NotFoundException;
 import com.capstone.fashionshop.mapper.CartMapper;
-import com.capstone.fashionshop.models.entities.User;
+import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.models.entities.order.OrderItem;
 import com.capstone.fashionshop.models.entities.product.ProductOption;

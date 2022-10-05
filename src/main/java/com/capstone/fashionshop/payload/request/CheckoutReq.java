@@ -14,6 +14,12 @@ public class CheckoutReq {
     private String name;
     @NotBlank(message = "Phone is required")
     private String phone;
+    @NotBlank(message = "Province can not be null")
+    private String province;
+    @NotBlank(message = "District can not be null")
+    private String district;
+    @NotBlank(message = "Ward can not be null")
+    private String ward;
     @NotBlank(message = "Address is required")
     private String address;
 }

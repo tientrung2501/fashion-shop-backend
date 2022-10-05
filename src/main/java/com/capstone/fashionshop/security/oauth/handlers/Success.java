@@ -2,7 +2,7 @@ package com.capstone.fashionshop.security.oauth.handlers;
 
 import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.mapper.UserMapper;
-import com.capstone.fashionshop.models.entities.User;
+import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.models.enums.EGender;
 import com.capstone.fashionshop.models.enums.EProvider;
 import com.capstone.fashionshop.payload.response.LoginRes;
@@ -59,8 +59,8 @@ public class Success extends SavedRequestAwareAuthenticationSuccessHandler {
 
     public String processAddUser(CustomOAuth2User oAuth2User, EProvider provider) {
         User newUser = new User(oAuth2User.getName(), oAuth2User.getEmail(), "",
-                "", "", Constants.ROLE_USER, oAuth2User.getProfilePicture(), EGender.OTHER,
-                Constants.USER_STATE_ACTIVATED, provider);
+                "", 0, 0, 0, "", Constants.ROLE_USER,
+                oAuth2User.getProfilePicture(), EGender.OTHER, Constants.USER_STATE_ACTIVATED, provider);
         userRepository.save(newUser);
         String accessToken = jwtUtil.generateTokenFromUserId(newUser);
         LoginRes res = userMapper.toLoginRes(newUser);

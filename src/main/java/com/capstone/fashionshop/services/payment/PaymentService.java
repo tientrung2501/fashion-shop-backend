@@ -3,7 +3,7 @@ package com.capstone.fashionshop.services.payment;
 import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.exception.NotFoundException;
-import com.capstone.fashionshop.models.entities.User;
+import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.models.entities.order.DeliveryDetail;
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.models.entities.order.PaymentDetail;
@@ -54,9 +54,10 @@ public class PaymentService {
             if (order.isEmpty() || !order.get().getId().equals(id)) {
                 throw new NotFoundException("Can not found any order with id: " + id);
             }
-            PaymentDetail paymentDetail = new PaymentDetail(paymentType.toUpperCase(),"", null);
+            PaymentDetail paymentDetail = new PaymentDetail(null,paymentType.toUpperCase(),"", null);
             order.get().setPaymentDetail(paymentDetail);
-            DeliveryDetail deliveryDetail = new DeliveryDetail(req.getName(), req.getPhone(), req.getAddress());
+            DeliveryDetail deliveryDetail = new DeliveryDetail(req.getName(), req.getPhone(),
+                    req.getProvince(), req.getDistrict(), req.getWard(),req.getAddress());
             order.get().setDeliveryDetail(deliveryDetail);
             order.get().setState(Constants.ORDER_STATE_PROCESS);
             orderRepository.save(order.get());
