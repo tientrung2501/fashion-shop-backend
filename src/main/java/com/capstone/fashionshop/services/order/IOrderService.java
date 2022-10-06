@@ -4,7 +4,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 public interface IOrderService {
-    ResponseEntity<?> findAll(Pageable pageable);
+    ResponseEntity<?> findAll(String state, Pageable pageable);
     ResponseEntity<?> findOrderById(String id);
-    ResponseEntity<?> cancelOrder(String id);
+    ResponseEntity<?> cancelOrder(String id, String userId);
 }

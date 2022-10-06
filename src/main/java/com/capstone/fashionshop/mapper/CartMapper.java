@@ -4,13 +4,11 @@ import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.models.entities.order.OrderItem;
 import com.capstone.fashionshop.payload.response.CartItemRes;
 import com.capstone.fashionshop.payload.response.CartRes;
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
 public class CartMapper {
     public CartRes toCartRes (Order order) {
         CartRes res = new CartRes(order.getId(), order.getTotalProduct(), order.getTotalPrice(), order.getState());

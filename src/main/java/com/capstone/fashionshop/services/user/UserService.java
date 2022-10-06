@@ -4,7 +4,7 @@ import com.capstone.fashionshop.config.CloudinaryConfig;
 import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.exception.NotFoundException;
-import com.capstone.fashionshop.mapper.CartMapper;
+import com.capstone.fashionshop.mapper.OrderMapper;
 import com.capstone.fashionshop.mapper.UserMapper;
 import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.models.enums.EGender;
@@ -12,7 +12,7 @@ import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.payload.request.ChangePasswordReq;
 import com.capstone.fashionshop.payload.request.RegisterReq;
 import com.capstone.fashionshop.payload.request.UserReq;
-import com.capstone.fashionshop.payload.response.CartRes;
+import com.capstone.fashionshop.payload.response.OrderRes;
 import com.capstone.fashionshop.payload.response.UserRes;
 import com.capstone.fashionshop.repository.UserRepository;
 import com.capstone.fashionshop.utils.StringUtils;
@@ -39,8 +39,7 @@ public class UserService implements IUserService {
     private final UserMapper userMapper;
     private final CloudinaryConfig cloudinary;
     private final PasswordEncoder passwordEncoder;
-    private final CartMapper cartMapper;
-
+    private final OrderMapper orderMapper;
     @Override
     public ResponseEntity<?> findAll(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
@@ -66,7 +65,8 @@ public class UserService implements IUserService {
     public ResponseEntity<?> getUserOrderHistory(String id) {
         Optional<User> user = userRepository.findUserByIdAndState(id, Constants.USER_STATE_ACTIVATED);
         if (user.isPresent()) {
-            List<CartRes> resList = user.get().getOrders().stream().map(cartMapper::toCartRes).collect(Collectors.toList());
+            List<OrderRes> resList = user.get().getOrders().stream().map(orderMapper::toOrderRes).collect(Collectors.toList());
+            if (resList.isEmpty()) throw new NotFoundException("Can not found any orders");
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Get order history of user success", resList));
         }
