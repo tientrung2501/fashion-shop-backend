@@ -1,5 +1,6 @@
 package com.capstone.fashionshop.models.entities.user;
 
+import com.capstone.fashionshop.models.entities.Review;
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.models.enums.EGender;
 import com.capstone.fashionshop.models.enums.EProvider;
@@ -55,6 +56,10 @@ public class User {
     @DocumentReference(lookup="{'user':?#{#self._id} }")
     @JsonIgnore
     private List<Order> orders;
+    @ReadOnlyProperty
+    @DocumentReference(lookup="{'user':?#{#self._id} }")
+    @JsonIgnore
+    private List<Review> reviews;
     @JsonIgnore
     private Token token;
     @CreatedDate

@@ -2,15 +2,14 @@ package com.capstone.fashionshop.models.entities.product;
 
 import com.capstone.fashionshop.models.entities.Brand;
 import com.capstone.fashionshop.models.entities.Category;
+import com.capstone.fashionshop.models.entities.Review;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.validator.constraints.Range;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.annotation.ReadOnlyProperty;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.annotation.*;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -28,9 +27,6 @@ import java.util.List;
 @Getter@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-//@CompoundIndexes({
-//        @CompoundIndex(def = "{'category.name' : 'text', 'brand.name' : 'text', 'productOptions.name':'text'}")
-//})
 public class Product {
     @Id
     private String id;
@@ -53,6 +49,7 @@ public class Product {
     @DocumentReference
     private Brand brand;
     private String url;
+    private double rate = 0;
     @TextIndexed(weight = 8)
     private List<ProductAttribute> attr = new ArrayList<>();
     @NotBlank(message = "State is required")
@@ -63,6 +60,9 @@ public class Product {
     @ReadOnlyProperty
     @DocumentReference(lookup="{'product':?#{#self._id} }")
     private List<ProductImage> images;
+    @ReadOnlyProperty
+    @DocumentReference(lookup="{'product':?#{#self._id} }")
+    private List<Review> reviews;
     @CreatedDate
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     LocalDateTime createdDate;
@@ -80,5 +80,10 @@ public class Product {
         this.brand = brand;
         this.state = state;
         this.discount = discount;
+    }
+
+    @Transient
+    public int getRateCount() {
+        return reviews.size();
     }
 }
