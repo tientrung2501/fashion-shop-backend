@@ -51,7 +51,7 @@ public class ProductOptionService implements IProductOptionService {
         Optional<ProductOption> option = productOptionRepository.findByNameAndProduct_Id(req.getName(), new ObjectId(productId));
         Optional<Product> product = productRepository.findProductByIdAndState(productId, Constants.ENABLE);
         if (product.isEmpty()) throw new NotFoundException("Can not found product with id: "+productId);
-        // case does not exists size
+        // case does not exist size
         if (option.isEmpty()) {
             ProductOption productOption = new ProductOption(req.getName(), req.getExtraFee());
             productOption.setProduct(product.get());

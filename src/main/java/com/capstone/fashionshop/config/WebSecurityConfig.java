@@ -62,6 +62,7 @@ public class WebSecurityConfig {
             "/api/categories/**",
             "/api/brands/**",
             "/api/reviews/**",
+            "/api/address/**",
     };
 
     @Value("${app.allow.origin}")

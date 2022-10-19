@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,6 +52,17 @@ public class OrderService implements IOrderService {
     }
 
     @Override
+    public ResponseEntity<?> findOrderById(String id, String userId) {
+        Optional<Order> order = orderRepository.findById(id);
+        if (order.isPresent() && order.get().getUser().getId().equals(userId)) {
+            OrderRes orderRes = orderMapper.toOrderDetailRes(order.get());
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Get order success", orderRes));
+        }
+        throw new NotFoundException("Can not found order with id: " + id);
+    }
+
+    @Override
     public ResponseEntity<?> cancelOrder(String id, String userId) {
         Optional<Order> order = orderRepository.findById(id);
         if (order.isPresent() && order.get().getUser().getId().equals(userId)) {
@@ -72,5 +84,10 @@ public class OrderService implements IOrderService {
                     "You cannot cancel or refund while the order is still processing!");
         }
         throw new NotFoundException("Can not found order with id: " + id);
+    }
+
+    @Override
+    public ResponseEntity<?> getOrderStatistical(LocalDateTime from, LocalDateTime to, String type, Pageable pageable) {
+        return null;
     }
 }

@@ -36,9 +36,11 @@ public class ProductMapper {
     }
 
     public ProductListRes toProductListRes(Product req) {
-        List<ProductImage> images = req.getProductOptions().stream()
-                .flatMap(p -> p.getVariants().stream())
-                .flatMap(v -> v.getImages().stream())
+//        List<ProductImage> images = req.getProductOptions().stream()
+//                .flatMap(p -> p.getVariants().stream())
+//                .flatMap(v -> v.getImages().stream())
+//                .filter(ProductImage::isThumbnail).distinct().collect(Collectors.toList());
+        List<ProductImage> images = req.getImages().stream()
                 .filter(ProductImage::isThumbnail).distinct().collect(Collectors.toList());
         HashSet<Object> seen=new HashSet<>();
         images.removeIf(e->!seen.add(e.getId()));
