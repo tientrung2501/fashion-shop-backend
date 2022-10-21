@@ -19,7 +19,6 @@ import java.util.List;
 public class ProductListRes {
     private String id;
     private String name;
-    private String url;
     private String description;
     private BigDecimal price;
     private BigDecimal discountPrice;

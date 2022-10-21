@@ -61,6 +61,7 @@ public class PaypalService extends PaymentFactory{
                         order.getPaymentDetail().setPaymentInfo(params);
                         order.getPaymentDetail().setPaymentId(payment.getId());
                         order.getPaymentDetail().setPaymentToken((links.getHref().split(PATTERN)[1]));
+                        order.getPaymentDetail().getPaymentInfo().put("isPaid", false);
                         orderRepository.save(order);
                         return ResponseEntity.status(HttpStatus.OK).body(
                                 new ResponseObject(true, "Payment init complete", links.getHref()));
@@ -85,6 +86,7 @@ public class PaypalService extends PaymentFactory{
                 if (order.isPresent()) {
                     order.get().getPaymentDetail().getPaymentInfo().put("payer", payment.getPayer().getPayerInfo());
                     order.get().getPaymentDetail().getPaymentInfo().put("paymentMethod", payment.getPayer().getPaymentMethod());
+                    order.get().getPaymentDetail().getPaymentInfo().put("isPaid", true);
                     order.get().setState(Constants.ORDER_STATE_PAID);
                     orderRepository.save(order.get());
                 }

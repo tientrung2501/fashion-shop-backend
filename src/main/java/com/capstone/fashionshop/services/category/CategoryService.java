@@ -8,7 +8,7 @@ import com.capstone.fashionshop.models.entities.Category;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.payload.request.CategoryReq;
 import com.capstone.fashionshop.repository.CategoryRepository;
-import com.mongodb.DuplicateKeyException;
+import com.mongodb.MongoWriteException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -78,8 +78,10 @@ public class CategoryService implements ICategoryService {
                     categoryRepository.save(parentCategory.get());
                 } else throw new NotFoundException("Can not found category with id: "+req.getParent_category());
             } else categoryRepository.save(category);
+        } catch (MongoWriteException e) {
+            throw new AppException(HttpStatus.CONFLICT.value(), "Category name already exists");
         } catch (Exception e) {
-            throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "Category name already exists");
+            throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), e.getMessage());
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new ResponseObject(true, "create category success", category));
@@ -91,10 +93,16 @@ public class CategoryService implements ICategoryService {
         Optional<Category> category = categoryRepository.findById(id);
         if (category.isPresent()) {
             category.get().setName(req.getName());
+            if (req.getState().isEmpty() || (!req.getState().equalsIgnoreCase(Constants.ENABLE) &&
+            !req.getState().equalsIgnoreCase(Constants.DISABLE)))
+                throw new AppException(HttpStatus.BAD_REQUEST.value(), "Invalid state");
+            category.get().setState(req.getState());
             try {
                 categoryRepository.save(category.get());
-            } catch (DuplicateKeyException e) {
+            } catch (MongoWriteException e) {
                 throw new AppException(HttpStatus.CONFLICT.value(), "Category name already exists");
+            } catch (Exception e) {
+                throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), e.getMessage());
             }
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Update category success", category));
@@ -103,6 +111,7 @@ public class CategoryService implements ICategoryService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> updateCategoryImage(String id, MultipartFile file) {
         Optional<Category> category = categoryRepository.findById(id);
         if (category.isPresent()) {
@@ -124,21 +133,16 @@ public class CategoryService implements ICategoryService {
     @Override
     @Transactional
     public ResponseEntity<?> deactivatedCategory(String id) {
-        categoryRepository.deleteById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject(true, "delete category success with id: "+id,""));
-
-//        Optional<Category> category = categoryRepository.findById(id);
-//        if (category.isPresent()) {
-//            category.get().setState(Constants.DISABLE);
-//            category.get().getSubCategories().forEach(c -> {
-//                c.setState(Constants.DISABLE);
-//            });
-//            categoryRepository.saveAll(category.get().getSubCategories());
-//            categoryRepository.save(category.get());
-//            return ResponseEntity.status(HttpStatus.OK).body(
-//                    new ResponseObject(true, "Update category success", category));
-//        }
-//        throw new NotFoundException("Can not found category with id: " + id);
+        Optional<Category> category = categoryRepository.findById(id);
+        if (category.isPresent()) {
+            if (!category.get().getProducts().isEmpty()) throw new AppException(HttpStatus.CONFLICT.value(),
+                    "There's a product belongs to that category.");
+            category.get().setState(Constants.DISABLE);
+            category.get().getSubCategories().forEach(c -> c.setState(Constants.DISABLE));
+            categoryRepository.saveAll(category.get().getSubCategories());
+            categoryRepository.save(category.get());
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Update category success", category));
+        } else throw new NotFoundException("Can not found category with id: " + id);
     }
 }

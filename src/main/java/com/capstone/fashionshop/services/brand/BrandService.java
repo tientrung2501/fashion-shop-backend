@@ -7,11 +7,12 @@ import com.capstone.fashionshop.exception.NotFoundException;
 import com.capstone.fashionshop.models.entities.Brand;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.repository.BrandRepository;
-import com.mongodb.DuplicateKeyException;
+import com.mongodb.MongoWriteException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -43,6 +44,7 @@ public class BrandService implements IBrandService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> addBrand(String name, MultipartFile file) {
         String imgUrl = null;
         if (file != null && !file.isEmpty()) {
@@ -55,7 +57,7 @@ public class BrandService implements IBrandService {
         Brand brand = new Brand(name, imgUrl , Constants.ENABLE);
         try {
             brandRepository.save(brand);
-        } catch (DuplicateKeyException e) {
+        } catch (MongoWriteException e) {
             throw new AppException(HttpStatus.CONFLICT.value(), "Brand name already exists");
         } catch (Exception e) {
             throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), e.getMessage());
@@ -65,10 +67,12 @@ public class BrandService implements IBrandService {
     }
 
     @Override
-    public ResponseEntity<?> updateBrand(String id, String name, MultipartFile file) {
+    @Transactional
+    public ResponseEntity<?> updateBrand(String id, String name, String state, MultipartFile file) {
         Optional<Brand> brand = brandRepository.findById(id);
         if (brand.isPresent()) {
             brand.get().setName(name);
+            brand.get().setState(state);
             if (file != null && !file.isEmpty()) {
                 try {
                     String imgUrl = cloudinary.uploadImage(file, brand.get().getImage());
@@ -79,7 +83,7 @@ public class BrandService implements IBrandService {
             }
             try {
                 brandRepository.save(brand.get());
-            } catch (DuplicateKeyException e) {
+            } catch (MongoWriteException e) {
                 throw new AppException(HttpStatus.CONFLICT.value(), "Brand name already exists");
             }
             return ResponseEntity.status(HttpStatus.OK).body(
@@ -89,9 +93,16 @@ public class BrandService implements IBrandService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> deactivatedBrand(String id) {
-        brandRepository.deleteById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject(true, "delete brand success with id: "+id,""));
+        Optional<Brand> brand = brandRepository.findBrandByIdAndState(id, Constants.ENABLE);
+        if (brand.isPresent()) {
+            if (!brand.get().getProducts().isEmpty()) throw new AppException(HttpStatus.CONFLICT.value(),
+                    "There's a product belongs to that brand.");
+            brand.get().setState(Constants.DISABLE);
+            brandRepository.save(brand.get());
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "delete brand success with id: "+id,""));
+        } else throw new NotFoundException("Can not found brand with id: " + id);
     }
 }

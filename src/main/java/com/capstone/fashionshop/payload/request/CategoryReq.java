@@ -15,4 +15,5 @@ public class CategoryReq {
     private String name;
     private String parent_category = "-1";
     private MultipartFile file;
+    private String state;
 }

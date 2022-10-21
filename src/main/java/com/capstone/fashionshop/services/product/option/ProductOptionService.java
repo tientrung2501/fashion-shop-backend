@@ -115,17 +115,22 @@ public class ProductOptionService implements IProductOptionService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> updateOptionVariant(String id, String variantColor, ProductOptionReq req) {
         Optional<ProductOption> productOption = productOptionRepository.findByIdAndVariantColor(id, variantColor);
         if (productOption.isPresent()) {
             productOption.get().setName(req.getName());
             productOption.get().setExtraFee(req.getExtraFee());
             productOption.get().getVariants().forEach(variant -> {
-                variant.setColor(req.getColor());
-                variant.setStock(req.getStock());
-                List<ProductImage> images = productImageRepository.findAllByColorAndProduct_Id(
-                        variant.getColor(), new ObjectId(productOption.get().getProduct().getId()));
-                variant.setImages(images);
+                if (variant.getColor().equals(variantColor)) {
+                    variant.setStock(req.getStock());
+                    if (!variant.getColor().equals(req.getColor())) {
+                        variant.setColor(req.getColor());
+                        List<ProductImage> images = productImageRepository.findAllByColorAndProduct_Id(
+                                variant.getColor(), new ObjectId(productOption.get().getProduct().getId()));
+                        if (!images.isEmpty()) variant.setImages(images);
+                    }
+                }
             });
             try {
                 productOptionRepository.save(productOption.get());

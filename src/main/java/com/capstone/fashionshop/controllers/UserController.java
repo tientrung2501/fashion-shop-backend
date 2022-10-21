@@ -27,7 +27,7 @@ public class UserController {
     private final JwtUtils jwtUtils;
 
     @GetMapping(path = "/admin/manage/users")
-    public ResponseEntity<?> findAll (@PageableDefault(size = 5) @ParameterObject Pageable pageable){
+    public ResponseEntity<?> findAll (@PageableDefault(size = 5, sort = "state") @ParameterObject Pageable pageable){
         return userService.findAll(pageable);
     }
 
@@ -52,6 +52,7 @@ public class UserController {
                                          @PathVariable("userId") String userId,
                                          HttpServletRequest request){
         User user = jwtUtils.getUserFromJWT(jwtUtils.getJwtFromHeader(request));
+        req.setState(null);
         if (user.getId().equals(userId) || !user.getId().isBlank())
             return userService.updateUser(userId, req);
         throw new AppException(HttpStatus.FORBIDDEN.value(), "You don't have permission! Token is invalid");

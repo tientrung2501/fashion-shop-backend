@@ -1,5 +1,6 @@
 package com.capstone.fashionshop.controllers;
 
+import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.services.brand.IBrandService;
 import lombok.AllArgsConstructor;
@@ -36,9 +37,13 @@ public class BrandController {
     @PostMapping(path = "/admin/manage/brands/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateBrand (@PathVariable("id") String id,
                                           @RequestParam("name") String name,
+                                          @RequestParam("state") String state,
                                           @RequestParam(value = "file",required = false) MultipartFile file) {
         if (name == null || name.isBlank()) throw new AppException(HttpStatus.BAD_REQUEST.value(), "Name is required");
-        return brandService.updateBrand(id, name, file);
+        if (state == null || state.isBlank() || (!state.equalsIgnoreCase(Constants.ENABLE) &&
+                !state.equalsIgnoreCase(Constants.DISABLE)))
+            throw new AppException(HttpStatus.BAD_REQUEST.value(), "State is invalid");
+        return brandService.updateBrand(id, name, state, file);
     }
 
     @DeleteMapping(path = "/admin/manage/brands/{id}")

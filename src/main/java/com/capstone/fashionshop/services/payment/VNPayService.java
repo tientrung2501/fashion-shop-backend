@@ -31,6 +31,7 @@ public class VNPayService extends PaymentFactory {
     @Override
     public ResponseEntity<?> createPayment(HttpServletRequest request, Order order) {
         order.setState(Constants.ORDER_STATE_PROCESS);
+        order.getPaymentDetail().getPaymentInfo().put("isPaid", false);
         orderRepository.save(order);
         Map<String, Object> vnp_Params = mapVnPayParam(order, request);
 
@@ -78,6 +79,7 @@ public class VNPayService extends PaymentFactory {
             order.get().getPaymentDetail().getPaymentInfo().put("amount", request.getParameter(VNPayUtils.vnp_Amount));
             order.get().getPaymentDetail().getPaymentInfo().put("bankCode", request.getParameter("vnp_BankCode"));
             order.get().getPaymentDetail().getPaymentInfo().put("transactionNo", request.getParameter("vnp_TransactionNo"));
+            order.get().getPaymentDetail().getPaymentInfo().put("isPaid", true);
             order.get().setState(Constants.ORDER_STATE_PAID);
             orderRepository.save(order.get());
             response.sendRedirect(PaymentService.CLIENT_REDIRECT + "true&cancel=false");

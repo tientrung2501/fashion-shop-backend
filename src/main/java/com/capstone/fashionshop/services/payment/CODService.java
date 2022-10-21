@@ -29,6 +29,7 @@ public class CODService extends PaymentFactory{
             String checkUpdateQuantityProduct = paymentUtils.checkingUpdateQuantityProduct(order, true);
             if (checkUpdateQuantityProduct == null) {
                 order.setState(Constants.ORDER_STATE_PENDING);
+                order.getPaymentDetail().getPaymentInfo().put("isPaid", false);
                 orderRepository.save(order);
                 return ResponseEntity.status(HttpStatus.OK).body(
                         new ResponseObject(true, " Pay by COD successfully", ""));
@@ -40,7 +41,7 @@ public class CODService extends PaymentFactory{
     public ResponseEntity<?> executePayment(String paymentId, String payerId, String responseCode, String id, HttpServletRequest request, HttpServletResponse response) {
         Optional<Order> order = orderRepository.findById(paymentId);
         if (order.isPresent() && order.get().getState().equals(Constants.ORDER_STATE_PENDING)) {
-            order.get().setState(Constants.ORDER_STATE_CONFIRMED);
+            order.get().setState(Constants.ORDER_STATE_DELIVERY);
             orderRepository.save(order.get());
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Confirmed order successfully", ""));

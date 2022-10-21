@@ -53,11 +53,11 @@ public class User {
     @NotBlank(message = "State is required")
     private String state;
     @ReadOnlyProperty
-    @DocumentReference(lookup="{'user':?#{#self._id} }")
+    @DocumentReference(lookup="{'user':?#{#self._id} }", lazy = true)
     @JsonIgnore
     private List<Order> orders;
     @ReadOnlyProperty
-    @DocumentReference(lookup="{'user':?#{#self._id} }")
+    @DocumentReference(lookup="{'user':?#{#self._id} }", lazy = true)
     @JsonIgnore
     private List<Review> reviews;
     @JsonIgnore

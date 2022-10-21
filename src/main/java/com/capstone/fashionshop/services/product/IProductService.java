@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 public interface IProductService {
-    ResponseEntity<?> findAll(Pageable pageable);
+    ResponseEntity<?> findAll(boolean isAdmin, Pageable pageable);
     ResponseEntity<?> findById(String id);
     ResponseEntity<?> findByCategoryIdOrBrandId(String catId, Pageable pageable);
     ResponseEntity<?> search(String key, Pageable pageable);

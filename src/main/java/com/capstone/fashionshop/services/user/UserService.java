@@ -27,9 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,9 +42,13 @@ public class UserService implements IUserService {
     public ResponseEntity<?> findAll(Pageable pageable) {
         Page<User> users = userRepository.findAll(pageable);
         List<UserRes> userResList = users.stream().map(userMapper::toUserRes).collect(Collectors.toList());
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("list", userResList);
+        resp.put("totalQuantity", users.getTotalElements());
+        resp.put("totalPage", users.getTotalPages());
         if (userResList.size() > 0)
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject(true, "Get all user success", userResList));
+                    new ResponseObject(true, "Get all user success", resp));
         throw new NotFoundException("Can not found any user");
     }
 
@@ -99,7 +101,10 @@ public class UserService implements IUserService {
     @Override
     @Transactional
     public ResponseEntity<?> updateUser(String id, UserReq userReq) {
-        Optional<User> user = userRepository.findUserByIdAndState(id, Constants.USER_STATE_ACTIVATED);
+        Optional<User> user;
+        if (userReq.getState() == null)
+            user = userRepository.findUserByIdAndState(id, Constants.USER_STATE_ACTIVATED);
+        else user = userRepository.findById(id);
         if (user.isPresent()) {
             updateUserProcess(userReq, user.get());
             userRepository.save(user.get());
@@ -131,6 +136,11 @@ public class UserService implements IUserService {
                 } catch (IllegalArgumentException e) {
                     throw new AppException(HttpStatus.BAD_REQUEST.value(), "Gender is invalid!");
                 }
+            if (src.getState() != null && !src.getState().isEmpty())
+                if (src.getState().equals(Constants.USER_STATE_ACTIVATED) ||
+                    src.getState().equals(Constants.USER_STATE_DEACTIVATED))
+                    des.setState(src.getState());
+                else throw new AppException(HttpStatus.BAD_REQUEST.value(), "State is invalid!");
         }
     }
 

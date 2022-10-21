@@ -22,4 +22,5 @@ public class ProductReq {
     private String category;
     @NotBlank(message = "Brand is required")
     private String brand;
+    private String state;
 }

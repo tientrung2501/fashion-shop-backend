@@ -61,9 +61,13 @@ public class PaymentService {
             order.get().setDeliveryDetail(deliveryDetail);
             order.get().setState(Constants.ORDER_STATE_PROCESS);
             orderRepository.save(order.get());
-        } catch (Exception e) {
+        } catch (NotFoundException e) {
             log.error(e.getMessage());
-            throw new AppException(HttpStatus.CONFLICT.value(), "More than one cart with user id: "+ user_id);
+            throw new NotFoundException(e.getMessage());
+        }catch (AppException e) {
+            throw new AppException(e.getCode(), e.getMessage());
+        } catch (Exception e) {
+            throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "More than one cart with user id: "+ user_id);
         }
         PaymentFactory paymentFactory = getPaymentMethod(paymentType);
         return paymentFactory.createPayment(request, order.get());

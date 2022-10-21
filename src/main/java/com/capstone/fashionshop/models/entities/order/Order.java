@@ -29,7 +29,7 @@ public class Order {
     @JsonIgnore
     private User user;
     @ReadOnlyProperty
-    @DocumentReference(lookup="{'order':?#{#self._id} }")
+    @DocumentReference(lookup="{'order':?#{#self._id} }", lazy = true)
     private List<OrderItem> items = new ArrayList<>();
     private DeliveryDetail deliveryDetail;
     private PaymentDetail paymentDetail;

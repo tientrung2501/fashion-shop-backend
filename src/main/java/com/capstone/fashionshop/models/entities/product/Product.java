@@ -48,20 +48,19 @@ public class Product {
     @NotBlank(message = "Brand is required")
     @DocumentReference
     private Brand brand;
-    private String url;
     private double rate = 0;
     @TextIndexed(weight = 8)
     private List<ProductAttribute> attr = new ArrayList<>();
     @NotBlank(message = "State is required")
     private String state;
     @ReadOnlyProperty
-    @DocumentReference(lookup="{'product':?#{#self._id} }")
+    @DocumentReference(lookup="{'product':?#{#self._id} }", lazy = true)
     private List<ProductOption> productOptions;
     @ReadOnlyProperty
-    @DocumentReference(lookup="{'product':?#{#self._id} }")
+    @DocumentReference(lookup="{'product':?#{#self._id} }", lazy = true)
     private List<ProductImage> images;
     @ReadOnlyProperty
-    @DocumentReference(lookup="{'product':?#{#self._id} }")
+    @DocumentReference(lookup="{'product':?#{#self._id} }", lazy = true)
     private List<Review> reviews;
     @CreatedDate
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")

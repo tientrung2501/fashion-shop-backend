@@ -1,5 +1,6 @@
 package com.capstone.fashionshop.controllers;
 
+import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.models.entities.product.ProductAttribute;
 import com.capstone.fashionshop.payload.request.ProductReq;
 import com.capstone.fashionshop.services.product.IProductService;
@@ -7,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,12 +34,19 @@ public class ProductController {
     @GetMapping(path = "/products/search")
     public ResponseEntity<?> search (@RequestParam("q") String query,
                                                          @PageableDefault(sort = "score") @ParameterObject Pageable pageable){
+        if (query.isEmpty() || query.matches(".*[%<>&;'\0-].*"))
+            throw new AppException(HttpStatus.BAD_REQUEST.value(), "Invalid keyword");
         return productService.search(query, pageable);
     }
 
     @GetMapping(path = "/products")
+    public ResponseEntity<?> findAllByState (@ParameterObject Pageable pageable){
+        return productService.findAll(false, pageable);
+    }
+
+    @GetMapping(path = "/manage/products")
     public ResponseEntity<?> findAll (@ParameterObject Pageable pageable){
-        return productService.findAll(pageable);
+        return productService.findAll(true,pageable);
     }
 
     @PostMapping("/manage/products")

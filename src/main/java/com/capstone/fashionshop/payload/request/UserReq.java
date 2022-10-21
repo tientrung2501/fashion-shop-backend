@@ -24,4 +24,5 @@ public class UserReq {
     @NotBlank(message = "Gender can not be null")
     private String gender;
     private String password;
+    private String state;
 }

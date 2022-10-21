@@ -1,5 +1,8 @@
 package com.capstone.fashionshop.models.entities;
 
+import com.capstone.fashionshop.config.Constants;
+import com.capstone.fashionshop.models.entities.product.Product;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,10 +31,18 @@ public class Category {
     private String state;
     @DocumentReference
     private List<Category> subCategories;
+    @DocumentReference(lookup="{'category':?#{#self._id} }", lazy = true)
+    @JsonIgnore
+    private List<Product> products;
 
     public Category(String name, String image, String state) {
         this.name = name;
         this.image = image;
         this.state = state;
+    }
+
+    public List<Category> getSubCategories() {
+        subCategories.removeIf(category -> (category.getState().equals(Constants.DISABLE)));
+        return subCategories;
     }
 }

@@ -13,7 +13,7 @@ import com.capstone.fashionshop.payload.request.ProductReq;
 import com.capstone.fashionshop.payload.response.ProductListRes;
 import com.capstone.fashionshop.payload.response.ProductRes;
 import com.capstone.fashionshop.repository.*;
-import com.capstone.fashionshop.utils.StringUtils;
+import com.mongodb.MongoWriteException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -42,8 +42,10 @@ public class ProductService implements IProductService {
     private final BrandRepository brandRepository;
     private final ProductMapper productMapper;
     @Override
-    public ResponseEntity<?> findAll(Pageable pageable) {
-        Page<Product> products = productRepository.findAll(pageable);
+    public ResponseEntity<?> findAll(boolean isAdmin, Pageable pageable) {
+        Page<Product> products;
+        if (isAdmin) products = productRepository.findAll(pageable);
+        else products = productRepository.findAllByState(Constants.ENABLE, pageable);
         List<ProductListRes> resList = products.getContent().stream().map(productMapper::toProductListRes).collect(Collectors.toList());
         ResponseEntity<?> resp = addPageableToRes(products, resList);
         if (resp != null) return resp;
@@ -94,9 +96,14 @@ public class ProductService implements IProductService {
 
     @Override
     public ResponseEntity<?> search(String key, Pageable pageable) {
-        Page<Product> products = productRepository.findAllBy(TextCriteria
-                .forDefaultLanguage().matchingAny(key),
-                pageable);
+        Page<Product> products;
+        try {
+            products = productRepository.findAllBy(TextCriteria
+                            .forDefaultLanguage().matchingAny(key),
+                    pageable);
+        } catch (Exception e) {
+            throw new NotFoundException("Can not found any product with: "+key);
+        }
         List<ProductListRes> resList = products.getContent().stream().map(productMapper::toProductListRes).collect(Collectors.toList());
         ResponseEntity<?> resp = addPageableToRes(products, resList);
         if (resp != null) return resp;
@@ -107,11 +114,6 @@ public class ProductService implements IProductService {
     public ResponseEntity<?> addProduct(ProductReq req) {
         if (req != null) {
             Product product = productMapper.toProduct(req);
-            String url = "/" + StringUtils.toSlug(product.getCategory().getName()) +
-                     "/" + StringUtils.toSlug(product.getName());
-            if (productRepository.existsProductByUrl(url))
-                url = url + System.currentTimeMillis();
-            product.setUrl(url);
             try {
                 productRepository.save(product);
             } catch (Exception e) {
@@ -128,31 +130,29 @@ public class ProductService implements IProductService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> updateProduct(String id, ProductReq req) {
-        Optional<Product> product = productRepository.findProductByIdAndState(id, Constants.ENABLE);
+        Optional<Product> product = productRepository.findById(id);
         if (product.isPresent() && req != null) {
             processUpdate(req, product.get());
             try {
                 productRepository.save(product.get());
-            } catch (Exception e) {
+            } catch (MongoWriteException e) {
                 throw new AppException(HttpStatus.CONFLICT.value(), "Product name already exists");
+            } catch (Exception e) {
+                throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), e.getMessage());
             }
             ProductRes res = productMapper.toProductRes(product.get());
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject(true, "Add product successfully ", res)
+                    new ResponseObject(true, "Update product successfully ", res)
             );
         }
         throw new NotFoundException("Can not found product with id: "+id);
     }
 
     public void processUpdate(ProductReq req, Product product) {
-        if (!req.getName().equals(product.getName())) {
+        if (!req.getName().equals(product.getName()))
             product.setName(req.getName());
-            String url = "/" + StringUtils.toSlug(req.getName());
-            if (productRepository.existsProductByUrl(url))
-                url = url + System.currentTimeMillis();
-            product.setUrl(url);
-        }
         if (!req.getDescription().equals(product.getDescription()))
             product.setDescription(req.getDescription());
         if (!req.getPrice().equals(product.getPrice()))
@@ -169,6 +169,11 @@ public class ProductService implements IProductService {
                 product.setBrand(brand.get());
             else throw new NotFoundException("Can not found brand with id: "+req.getBrand());
         }
+        if (req.getState() != null && !req.getState().isEmpty() &&
+                (req.getState().equalsIgnoreCase(Constants.ENABLE) ||
+                req.getState().equalsIgnoreCase(Constants.DISABLE)))
+            product.setState(req.getState());
+        else throw new AppException(HttpStatus.BAD_REQUEST.value(), "Invalid state");
     }
 
     @Override
@@ -203,6 +208,7 @@ public class ProductService implements IProductService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> addAttribute(String id, ProductAttribute req) {
         Optional<Product> product = productRepository.findProductByIdAndState(id, Constants.ENABLE);
         if (product.isPresent()) {
@@ -218,6 +224,7 @@ public class ProductService implements IProductService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> updateAttribute(String id, ProductAttribute req) {
         Optional<Product> product = productRepository.findProductByIdAndState(id, Constants.ENABLE);
         if (product.isPresent()) {
@@ -232,6 +239,7 @@ public class ProductService implements IProductService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> deleteAttribute(String id, String name) {
         Optional<Product> product = productRepository.findProductByIdAndState(id, Constants.ENABLE);
         if (product.isPresent() && !name.isBlank()) {
