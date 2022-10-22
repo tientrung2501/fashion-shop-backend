@@ -1,30 +1,22 @@
 package com.capstone.fashionshop.models.entities.product;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.DocumentReference;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Document(collection = "product_image")
+//@Document(collection = "product_image")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductImage {
-    @Id
-    private String id;
+//    @Id
+    private String imageId;
     private String url;
     private boolean thumbnail;
     private String color;
-    @DocumentReference(lazy = true)
-    @JsonIgnore
-    private Product product;
-
-    public ProductImage(String url, boolean thumbnail, String color, Product product) {
-        this.url = url;
-        this.thumbnail = thumbnail;
-        this.color = color;
-        this.product = product;
-    }
+//    @DocumentReference(lazy = true)
+//    @JsonIgnore
+//    private Product product;
 }

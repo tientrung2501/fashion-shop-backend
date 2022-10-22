@@ -56,9 +56,9 @@ public class Product {
     @ReadOnlyProperty
     @DocumentReference(lookup="{'product':?#{#self._id} }", lazy = true)
     private List<ProductOption> productOptions;
-    @ReadOnlyProperty
-    @DocumentReference(lookup="{'product':?#{#self._id} }", lazy = true)
-    private List<ProductImage> images;
+//    @ReadOnlyProperty
+//    @DocumentReference(lookup="{'product':?#{#self._id} }", lazy = true)
+    private List<ProductImage> images = new ArrayList<>();
     @ReadOnlyProperty
     @DocumentReference(lookup="{'product':?#{#self._id} }", lazy = true)
     private List<Review> reviews;
@@ -83,6 +83,10 @@ public class Product {
 
     @Transient
     public int getRateCount() {
-        return reviews.size();
+        try {
+            return reviews.size();
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }

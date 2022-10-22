@@ -1,6 +1,7 @@
 package com.capstone.fashionshop.payload.response;
 
 import com.capstone.fashionshop.models.entities.product.ProductAttribute;
+import com.capstone.fashionshop.models.entities.product.ProductImage;
 import com.capstone.fashionshop.models.entities.product.ProductOption;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -28,4 +29,5 @@ public class ProductRes {
     private String state;
     private List<ProductAttribute> attr;
     private List<ProductOption> options;
+    private List<ProductImage> images;
 }

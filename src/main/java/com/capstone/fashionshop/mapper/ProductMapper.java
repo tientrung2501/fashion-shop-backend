@@ -36,14 +36,10 @@ public class ProductMapper {
     }
 
     public ProductListRes toProductListRes(Product req) {
-//        List<ProductImage> images = req.getProductOptions().stream()
-//                .flatMap(p -> p.getVariants().stream())
-//                .flatMap(v -> v.getImages().stream())
-//                .filter(ProductImage::isThumbnail).distinct().collect(Collectors.toList());
         List<ProductImage> images = req.getImages().stream()
                 .filter(ProductImage::isThumbnail).distinct().collect(Collectors.toList());
         HashSet<Object> seen=new HashSet<>();
-        images.removeIf(e->!seen.add(e.getId()));
+        images.removeIf(e->!seen.add(e.getImageId()));
 
         String discountString = req.getPrice().multiply(BigDecimal.valueOf((double) (100- req.getDiscount())/100))
                 .stripTrailingZeros().toPlainString();
@@ -59,6 +55,6 @@ public class ProductMapper {
         BigDecimal discountPrice = new BigDecimal(discountString);
         return new ProductRes(req.getId(), req.getName(), req.getDescription(),
                 req.getPrice(),discountPrice, req.getDiscount(), req.getRate(), req.getRateCount(), req.getCategory().getName(),
-                req.getBrand().getName(), req.getState(), req.getAttr(), req.getProductOptions());
+                req.getBrand().getName(), req.getState(), req.getAttr(), req.getProductOptions(), req.getImages());
     }
 }

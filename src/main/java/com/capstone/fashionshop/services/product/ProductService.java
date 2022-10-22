@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 public class ProductService implements IProductService {
     private final ProductRepository productRepository;
     private final ProductOptionRepository productOptionRepository;
-    private final ProductImageRepository productImageRepository;
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
     private final ProductMapper productMapper;
@@ -195,7 +194,6 @@ public class ProductService implements IProductService {
         if (product.isPresent()) {
             try {
                 productRepository.deleteById(product.get().getId());
-                productImageRepository.deleteByProduct_Id(product.get().getId());
                 productOptionRepository.deleteByProduct_Id(product.get().getId());
             } catch (Exception e) {
                 log.error(e.getMessage());

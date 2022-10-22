@@ -4,13 +4,12 @@ import com.capstone.fashionshop.config.CloudinaryConfig;
 import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.exception.NotFoundException;
-import com.capstone.fashionshop.models.entities.product.ProductVariant;
 import com.capstone.fashionshop.models.entities.product.Product;
 import com.capstone.fashionshop.models.entities.product.ProductImage;
 import com.capstone.fashionshop.models.entities.product.ProductOption;
+import com.capstone.fashionshop.models.entities.product.ProductVariant;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.payload.request.ProductOptionReq;
-import com.capstone.fashionshop.repository.ProductImageRepository;
 import com.capstone.fashionshop.repository.ProductOptionRepository;
 import com.capstone.fashionshop.repository.ProductRepository;
 import com.mongodb.MongoWriteException;
@@ -24,10 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -35,7 +34,6 @@ import java.util.UUID;
 public class ProductOptionService implements IProductOptionService {
     private final ProductRepository productRepository;
     private final ProductOptionRepository productOptionRepository;
-    private final ProductImageRepository productImageRepository;
     private final CloudinaryConfig cloudinary;
 
     @Override
@@ -67,24 +65,25 @@ public class ProductOptionService implements IProductOptionService {
 
     public List<ProductImage> processUploadImage (List<MultipartFile> images, String color, Product product) {
         if (images == null || images.isEmpty()) throw new AppException(HttpStatus.BAD_REQUEST.value(), "images is empty");
-        List<ProductImage> imageList = new ArrayList<>();
         for (int i = 0; i < images.size(); i++) {
             try {
                 String url = cloudinary.uploadImage(images.get(i), null);
-                if (i == 0) imageList.add(new ProductImage(url, true, color, product));
-                else imageList.add(new ProductImage(url, false, color, product));
+                if (i == 0) product.getImages().add(new ProductImage(UUID.randomUUID().toString(), url, true, color));
+                else product.getImages().add(new ProductImage(UUID.randomUUID().toString(), url, false, color));
             } catch (IOException e) {
                 log.error(e.getMessage());
                 throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "Error when upload images");
             }
-            productImageRepository.saveAll(imageList);
+            productRepository.save(product);
         }
-        return imageList;
+        return product.getImages();
     }
 
     public void processVariant (ProductOption productOption ,String color, List<MultipartFile> files,
                                 Long stock, Product product) {
-        List<ProductImage> images = productImageRepository.findAllByColorAndProduct_Id(color, new ObjectId(product.getId()));
+//        List<ProductImage> images = productImageRepository.findAllByColorAndProduct_Id(color, new ObjectId(product.getId()));
+        List<ProductImage> images = product.getImages()
+                .stream().filter(i -> i.getColor().equals(color)).collect(Collectors.toList());
         if (images.isEmpty()) images = processUploadImage(files, color, product);
         ProductVariant variants = new ProductVariant(UUID.randomUUID(), color, stock, images);
         productOption.getVariants().add(variants);
@@ -126,8 +125,8 @@ public class ProductOptionService implements IProductOptionService {
                     variant.setStock(req.getStock());
                     if (!variant.getColor().equals(req.getColor())) {
                         variant.setColor(req.getColor());
-                        List<ProductImage> images = productImageRepository.findAllByColorAndProduct_Id(
-                                variant.getColor(), new ObjectId(productOption.get().getProduct().getId()));
+                        List<ProductImage> images = productOption.get().getProduct().getImages()
+                                .stream().filter(i -> i.getColor().equals(variantColor)).collect(Collectors.toList());
                         if (!images.isEmpty()) variant.setImages(images);
                     }
                 }
