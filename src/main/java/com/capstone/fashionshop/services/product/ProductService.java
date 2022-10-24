@@ -1,5 +1,6 @@
 package com.capstone.fashionshop.services.product;
 
+import com.capstone.fashionshop.config.CloudinaryConfig;
 import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.exception.NotFoundException;
@@ -8,11 +9,15 @@ import com.capstone.fashionshop.models.entities.Brand;
 import com.capstone.fashionshop.models.entities.Category;
 import com.capstone.fashionshop.models.entities.product.Product;
 import com.capstone.fashionshop.models.entities.product.ProductAttribute;
+import com.capstone.fashionshop.models.entities.product.ProductImage;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.payload.request.ProductReq;
 import com.capstone.fashionshop.payload.response.ProductListRes;
 import com.capstone.fashionshop.payload.response.ProductRes;
-import com.capstone.fashionshop.repository.*;
+import com.capstone.fashionshop.repository.BrandRepository;
+import com.capstone.fashionshop.repository.CategoryRepository;
+import com.capstone.fashionshop.repository.ProductOptionRepository;
+import com.capstone.fashionshop.repository.ProductRepository;
 import com.mongodb.MongoWriteException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +29,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +44,7 @@ public class ProductService implements IProductService {
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
     private final ProductMapper productMapper;
+    private final CloudinaryConfig cloudinary;
     @Override
     public ResponseEntity<?> findAll(boolean isAdmin, Pageable pageable) {
         Page<Product> products;
@@ -247,5 +252,54 @@ public class ProductService implements IProductService {
                     new ResponseObject(true, "Delete attribute successfully", "")
             );
         } throw new NotFoundException("Can not found product with id: "+id);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<?> addImagesToProduct(String id, String color, List<MultipartFile> files) {
+        Optional<Product> product = productRepository.findById(id);
+        if (product.isPresent()) {
+            try {
+                if (files == null || files.isEmpty() || color.isEmpty()) throw new AppException(HttpStatus.BAD_REQUEST.value(), "Images and color is require");
+                files.forEach(f -> {
+                    try {
+                        String url = cloudinary.uploadImage(f, null);
+                        product.get().getImages().add(new ProductImage(UUID.randomUUID().toString(), url, false, color));
+                    } catch (IOException e) {
+                        log.error(e.getMessage());
+                        throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "Error when upload images");
+                    }
+                    productRepository.save(product.get());
+                });
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject(true, "Add image to product successfully", product.get().getImages())
+                );
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                throw new NotFoundException("Error when save image: " + e.getMessage());
+            }
+        } throw new NotFoundException("Can not found product with id: " + id);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<?> deleteImageFromProduct(String id, String imageId) {
+        Optional<Product> product = productRepository.findById(id);
+        if (product.isPresent() && !product.get().getImages().isEmpty()) {
+            try {
+                Optional<ProductImage> checkDelete = product.get().getImages().stream().filter(i -> i.getImageId().equals(imageId)).findFirst();
+                if (checkDelete.isPresent()) {
+                    cloudinary.deleteImage(checkDelete.get().getUrl());
+                    product.get().getImages().remove(checkDelete.get());
+                    productRepository.save(product.get());
+                    return ResponseEntity.status(HttpStatus.OK).body(
+                            new ResponseObject(true, "Delete image successfully", imageId)
+                    );
+                } else throw new NotFoundException("Can not found image in product with id: " + imageId);
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                throw new NotFoundException("Can not found product with id: " + id);
+            }
+        } throw new NotFoundException("Can not found any image or product with id: " + id);
     }
 }

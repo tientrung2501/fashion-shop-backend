@@ -31,8 +31,8 @@ public class Order {
     @ReadOnlyProperty
     @DocumentReference(lookup="{'order':?#{#self._id} }", lazy = true)
     private List<OrderItem> items = new ArrayList<>();
-    private DeliveryDetail deliveryDetail;
-    private PaymentDetail paymentDetail;
+    private DeliveryDetail deliveryDetail = new DeliveryDetail();
+    private PaymentDetail paymentDetail = new PaymentDetail();
     @NotBlank(message = "State is required")
     private String state;
     @CreatedDate

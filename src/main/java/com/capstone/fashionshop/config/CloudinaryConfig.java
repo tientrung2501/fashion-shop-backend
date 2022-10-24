@@ -43,15 +43,15 @@ public class CloudinaryConfig {
                 "folder", "fashion"
         );
         Map map = cloudinary().uploader().upload(ImageUtils.convertMultiPartToFile(file),params);
-        if (urlDestroy!= null && urlDestroy.startsWith("https://res.cloudinary.com/dmlt1eshx/image/upload")) {
-            deleteImage(urlDestroy);
-        }
+        deleteImage(urlDestroy);
         ImageUtils.deleteMultipartFile(ImageUtils.convertMultiPartToFile(file));
         return map.get("secure_url").toString();
     }
 
     public void deleteImage(String urlImage) throws IOException {
-        cloudinary().uploader().destroy("fashion/" + getPublicId(urlImage)
-                , ObjectUtils.asMap("resource_type", "image"));
+        if (urlImage != null && urlImage.startsWith("https://res.cloudinary.com/dmlt1eshx/image/upload")) {
+            cloudinary().uploader().destroy("fashion/" + getPublicId(urlImage)
+                    , ObjectUtils.asMap("resource_type", "image"));
+        }
     }
 }

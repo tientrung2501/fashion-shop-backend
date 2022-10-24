@@ -43,8 +43,6 @@ public class Success extends SavedRequestAwareAuthenticationSuccessHandler {
                         !user.get().getProvider().equals(EProvider.LOCAL) &&
                         provider.equals(user.get().getProvider())) {
                     String accessToken = jwtUtil.generateTokenFromUserId(user.get());
-                    LoginRes userLoginRes = userMapper.toLoginRes(user.get());
-                    userLoginRes.setAccessToken(accessToken);
                     response.sendRedirect(generateRedirectURL(true, accessToken, provider, ""));
                 } else response.sendRedirect(generateRedirectURL(false, "",
                         user.get().getProvider(), user.get().getEmail() + " already have an account with +"+

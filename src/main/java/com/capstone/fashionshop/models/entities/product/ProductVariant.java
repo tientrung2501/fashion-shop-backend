@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
-import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -17,5 +16,5 @@ public class ProductVariant {
     private String color;
     @NotBlank(message = "Stock is required")
     private Long stock;
-    private List<ProductImage> images;
+//    private List<ProductImage> images;
 }

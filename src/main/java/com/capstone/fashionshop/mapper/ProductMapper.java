@@ -15,7 +15,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,10 +36,14 @@ public class ProductMapper {
     }
 
     public ProductListRes toProductListRes(Product req) {
-        List<ProductImage> images = req.getImages().stream()
-                .filter(ProductImage::isThumbnail).distinct().collect(Collectors.toList());
-        HashSet<Object> seen=new HashSet<>();
-        images.removeIf(e->!seen.add(e.getImageId()));
+        List<ProductImage> images = new ArrayList<>();
+        if (!req.getImages().isEmpty()) {
+            images = req.getImages().stream()
+                    .filter(ProductImage::isThumbnail).distinct().collect(Collectors.toList());
+            if (images.isEmpty()) images = req.getImages();
+        }
+//        HashSet<Object> seen=new HashSet<>();
+//        images.removeIf(e->!seen.add(e.getImageId()));
 
         String discountString = req.getPrice().multiply(BigDecimal.valueOf((double) (100- req.getDiscount())/100))
                 .stripTrailingZeros().toPlainString();

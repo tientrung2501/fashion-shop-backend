@@ -2,6 +2,7 @@ package com.capstone.fashionshop.controllers;
 
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.models.entities.product.ProductAttribute;
+import com.capstone.fashionshop.payload.request.ImageReq;
 import com.capstone.fashionshop.payload.request.ProductReq;
 import com.capstone.fashionshop.services.product.IProductService;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,7 @@ import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -86,5 +88,17 @@ public class ProductController {
     public ResponseEntity<?> deleteAttribute(@PathVariable("productId") String id,
                                              @RequestBody ProductAttribute req) {
         return productService.deleteAttribute(id, req.getName());
+    }
+
+    @PostMapping(value = "/manage/products/images/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> addImages(@PathVariable("productId") String id ,
+                                          @ModelAttribute ImageReq req) {
+        return productService.addImagesToProduct(id, req.getColor(), req.getFiles());
+    }
+
+    @DeleteMapping("/manage/products/images/{productId}")
+    public ResponseEntity<?> deleteImage(@PathVariable("productId") String id,
+                                         @RequestBody ImageReq req) {
+        return productService.deleteImageFromProduct(id, req.getImageId());
     }
 }

@@ -1,11 +1,15 @@
 package com.capstone.fashionshop.mapper;
 
+import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.models.entities.order.OrderItem;
+import com.capstone.fashionshop.models.entities.product.ProductImage;
 import com.capstone.fashionshop.payload.response.CartItemRes;
 import com.capstone.fashionshop.payload.response.CartRes;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,11 +21,17 @@ public class CartMapper {
     }
 
     public static CartItemRes toCartItemRes(OrderItem orderItem) {
-        return new CartItemRes(orderItem.getId(), orderItem.getItem().getProduct().getName(),
-                orderItem.getItem().getProduct().getDiscount(),
-                orderItem.getItem().getVariants().get(0).getImages().get(0).getUrl(),
-                orderItem.getItem().getProduct().getPrice().add(orderItem.getItem().getExtraFee()),
-                orderItem.getItem().getId(), orderItem.getColor(), orderItem.getItem().getName(),
-                orderItem.getQuantity(), orderItem.getItem().getVariants().get(0).getStock(), orderItem.getSubPrice());
+        Optional<ProductImage> image = Optional.ofNullable(orderItem.getItem().getProduct().getImages().stream().filter(x -> x.isThumbnail() && x.getColor().equals(orderItem.getColor())).findFirst()
+                .orElse(orderItem.getItem().getProduct().getImages().get(0)));
+        try {
+            return new CartItemRes(orderItem.getId(), orderItem.getItem().getProduct().getName(),
+                    orderItem.getItem().getProduct().getDiscount(),
+                    image.get().getUrl(),
+                    orderItem.getItem().getProduct().getPrice().add(orderItem.getItem().getExtraFee()),
+                    orderItem.getItem().getId(), orderItem.getColor(), orderItem.getItem().getName(),
+                    orderItem.getQuantity(), orderItem.getItem().getVariants().get(0).getStock(), orderItem.getSubPrice());
+        } catch (Exception e) {
+            throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "get cart item failed");
+        }
     }
 }

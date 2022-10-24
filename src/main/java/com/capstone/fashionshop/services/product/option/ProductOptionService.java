@@ -63,7 +63,7 @@ public class ProductOptionService implements IProductOptionService {
         }
     }
 
-    public List<ProductImage> processUploadImage (List<MultipartFile> images, String color, Product product) {
+    public void processUploadImage (List<MultipartFile> images, String color, Product product) {
         if (images == null || images.isEmpty()) throw new AppException(HttpStatus.BAD_REQUEST.value(), "images is empty");
         for (int i = 0; i < images.size(); i++) {
             try {
@@ -76,16 +76,15 @@ public class ProductOptionService implements IProductOptionService {
             }
             productRepository.save(product);
         }
-        return product.getImages();
+//        return product.getImages();
     }
 
     public void processVariant (ProductOption productOption ,String color, List<MultipartFile> files,
                                 Long stock, Product product) {
-//        List<ProductImage> images = productImageRepository.findAllByColorAndProduct_Id(color, new ObjectId(product.getId()));
         List<ProductImage> images = product.getImages()
                 .stream().filter(i -> i.getColor().equals(color)).collect(Collectors.toList());
-        if (images.isEmpty()) images = processUploadImage(files, color, product);
-        ProductVariant variants = new ProductVariant(UUID.randomUUID(), color, stock, images);
+        if (images.isEmpty()) processUploadImage(files, color, product);
+        ProductVariant variants = new ProductVariant(UUID.randomUUID(), color, stock);
         productOption.getVariants().add(variants);
         try {
             productOptionRepository.save(productOption);
@@ -125,9 +124,9 @@ public class ProductOptionService implements IProductOptionService {
                     variant.setStock(req.getStock());
                     if (!variant.getColor().equals(req.getColor())) {
                         variant.setColor(req.getColor());
-                        List<ProductImage> images = productOption.get().getProduct().getImages()
-                                .stream().filter(i -> i.getColor().equals(variantColor)).collect(Collectors.toList());
-                        if (!images.isEmpty()) variant.setImages(images);
+//                        List<ProductImage> images = productOption.get().getProduct().getImages()
+//                                .stream().filter(i -> i.getColor().equals(variantColor)).collect(Collectors.toList());
+//                        if (!images.isEmpty()) variant.setImages(images);
                     }
                 }
             });
