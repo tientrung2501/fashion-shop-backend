@@ -7,12 +7,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
 import java.util.List;
 
 @Document(collection = "categories")
@@ -30,7 +32,8 @@ public class Category {
     private boolean root = true;
     private String state;
     @DocumentReference
-    private List<Category> subCategories;
+    private List<Category> subCategories = new ArrayList<>();
+    @ReadOnlyProperty
     @DocumentReference(lookup="{'category':?#{#self._id} }", lazy = true)
     @JsonIgnore
     private List<Product> products;

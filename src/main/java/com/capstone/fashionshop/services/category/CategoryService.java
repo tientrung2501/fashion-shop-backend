@@ -85,7 +85,7 @@ public class CategoryService implements ICategoryService {
             throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), e.getMessage());
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                new ResponseObject(true, "create category success", category));
+                new ResponseObject(true, "create category success", ""));
     }
 
     @Override
@@ -143,7 +143,7 @@ public class CategoryService implements ICategoryService {
             categoryRepository.saveAll(category.get().getSubCategories());
             categoryRepository.save(category.get());
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject(true, "Update category success", category));
+                    new ResponseObject(true, "Deactivated category success", id));
         } else throw new NotFoundException("Can not found category with id: " + id);
     }
 }
