@@ -27,7 +27,8 @@ public class BrandService implements IBrandService {
 
     @Override
     public ResponseEntity<?> findAll() {
-        List<Brand> list = brandRepository.findAllByState(Constants.ENABLE);
+//        List<Brand> list = brandRepository.findAllByState(Constants.ENABLE);
+        List<Brand> list = brandRepository.findAll();
         if (list.size() > 0)
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Get all brand success", list));

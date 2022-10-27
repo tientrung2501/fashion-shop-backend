@@ -6,6 +6,7 @@ import com.capstone.fashionshop.exception.NotFoundException;
 import com.capstone.fashionshop.mapper.UserMapper;
 import com.capstone.fashionshop.models.entities.user.Token;
 import com.capstone.fashionshop.models.entities.user.User;
+import com.capstone.fashionshop.models.enums.EProvider;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.payload.request.LoginReq;
 import com.capstone.fashionshop.payload.request.RegisterReq;
@@ -55,14 +56,15 @@ public class AuthService implements IAuthService {
                     new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
             CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
-            String access_token = jwtUtils.generateTokenFromUserId(user.getUser());
-            LoginRes res = userMapper.toLoginRes(user.getUser());
-            res.setAccessToken(access_token);
-
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject(true, "Log in successfully ", res)
-            );
-
+            if (user.getUser().getProvider().equals(EProvider.LOCAL)) {
+                String access_token = jwtUtils.generateTokenFromUserId(user.getUser());
+                LoginRes res = userMapper.toLoginRes(user.getUser());
+                res.setAccessToken(access_token);
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject(true, "Log in successfully ", res)
+                );
+            } else throw new AppException(HttpStatus.BAD_REQUEST.value(), "Your account is " +
+                    user.getUser().getProvider() + " account");
         } catch (BadCredentialsException ex) {
 //            ex.printStackTrace();
             throw new BadCredentialsException(ex.getMessage());
@@ -91,15 +93,18 @@ public class AuthService implements IAuthService {
     public ResponseEntity<?> reset(String email) {
         Optional<User> user = userRepository.findUserByEmailAndState(email, Constants.USER_STATE_ACTIVATED);
         if (user.isPresent()) {
-            try {
-                sendVerifyMail(user.get());
-                return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject(true, "Send email reset password success", email));
-            } catch (Exception e) {
-                e.printStackTrace();
-                log.error(e.getMessage());
-                throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "Failed to send reset email");
-            }
+            if (user.get().getProvider().equals(EProvider.LOCAL)) {
+                try {
+                    sendVerifyMail(user.get());
+                    return ResponseEntity.status(HttpStatus.OK).body(
+                            new ResponseObject(true, "Send email reset password success", email));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    log.error(e.getMessage());
+                    throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "Failed to send reset email");
+                }
+            } else throw new AppException(HttpStatus.BAD_REQUEST.value(), "Your account is " +
+                    user.get().getProvider() + " account");
         }
         throw new NotFoundException("Can not found user with email " + email + " is activated");
     }
@@ -129,6 +134,8 @@ public class AuthService implements IAuthService {
     private ResponseEntity<?> verifyReset(String email, String otp) {
         Optional<User> user = userRepository.findUserByEmailAndState(email, Constants.USER_STATE_ACTIVATED);
         if (user.isPresent()) {
+            if (!user.get().getProvider().equals(EProvider.LOCAL)) throw new AppException(HttpStatus.BAD_REQUEST.value(), "Your account is " +
+                    user.get().getProvider() + " account");
             Map<String, Object> res = new HashMap<>();
             boolean verify = false;
                 if (LocalDateTime.now().isBefore(user.get().getToken().getExp())) {

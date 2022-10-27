@@ -8,6 +8,7 @@ import com.capstone.fashionshop.mapper.OrderMapper;
 import com.capstone.fashionshop.mapper.UserMapper;
 import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.models.enums.EGender;
+import com.capstone.fashionshop.models.enums.EProvider;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.payload.request.ChangePasswordReq;
 import com.capstone.fashionshop.payload.request.RegisterReq;
@@ -87,6 +88,7 @@ public class UserService implements IUserService {
                     req.getRole().toUpperCase(Locale.ROOT).equals(Constants.ROLE_USER))
                 user.setRole(req.getRole().toUpperCase());
             else throw new NotFoundException("Can not found role: "+ req.getRole());
+            user.setState(Constants.USER_STATE_ACTIVATED);
             try {
                 userRepository.insert(user);
             } catch (Exception e){
@@ -182,6 +184,8 @@ public class UserService implements IUserService {
     public ResponseEntity<?> updatePassword(String id, ChangePasswordReq req) {
         Optional<User> user = userRepository.findUserByIdAndState(id, Constants.USER_STATE_ACTIVATED);
         if (user.isPresent()) {
+            if (!user.get().getProvider().equals(EProvider.LOCAL)) throw new AppException(HttpStatus.BAD_REQUEST.value(), "Your account is " +
+                    user.get().getProvider() + " account");
             if (passwordEncoder.matches(req.getOldPassword(), user.get().getPassword())
             && !req.getNewPassword().equals(req.getOldPassword())) {
                 user.get().setPassword(passwordEncoder.encode(req.getNewPassword()));
@@ -199,6 +203,8 @@ public class UserService implements IUserService {
     public ResponseEntity<?> updatePasswordReset(String id, ChangePasswordReq req) {
         Optional<User> user = userRepository.findUserByIdAndState(id, Constants.USER_STATE_ACTIVATED);
         if (user.isPresent() && user.get().getToken() != null) {
+            if (!user.get().getProvider().equals(EProvider.LOCAL)) throw new AppException(HttpStatus.BAD_REQUEST.value(), "Your account is " +
+                    user.get().getProvider() + " account");
             if (req.getOldPassword().equals(user.get().getToken().getOtp())) {
                 user.get().setPassword(passwordEncoder.encode(req.getNewPassword()));
                 user.get().setToken(null);
