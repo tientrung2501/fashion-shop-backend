@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -27,8 +28,18 @@ public class BrandService implements IBrandService {
 
     @Override
     public ResponseEntity<?> findAll() {
-//        List<Brand> list = brandRepository.findAllByState(Constants.ENABLE);
-        List<Brand> list = brandRepository.findAll();
+        List<Brand> list = brandRepository.findAllByState(Constants.ENABLE);
+        if (list.size() > 0)
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Get all brand success", list));
+        throw new NotFoundException("Can not found any brand");
+    }
+
+    @Override
+    public ResponseEntity<?> findAll(String state) {
+        List<Brand> list;
+        if (state == null || state.isBlank()) list=  brandRepository.findAll();
+        else list=  brandRepository.findAllByState(state.toLowerCase(Locale.ROOT));
         if (list.size() > 0)
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Get all brand success", list));

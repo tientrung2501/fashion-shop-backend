@@ -30,7 +30,8 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public ResponseEntity<?> findAll() {
-        List<Category> list = categoryRepository.findAllByState(Constants.ENABLE);
+//        List<Category> list = categoryRepository.findAllByState(Constants.ENABLE);
+        List<Category> list = categoryRepository.findAll();
         if (list.size() > 0)
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Get all category success", list));

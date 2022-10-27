@@ -22,6 +22,11 @@ public class BrandController {
         return brandService.findAll();
     }
 
+    @GetMapping(path = "/admin/manage/brands")
+    public ResponseEntity<?> findAll (@RequestParam(value = "state", defaultValue = "") String state){
+        return brandService.findAll(state);
+    }
+
     @GetMapping(path = "/brands/{id}")
     public ResponseEntity<?> findBrandById (@PathVariable("id") String id){
         return brandService.findBrandById(id);
