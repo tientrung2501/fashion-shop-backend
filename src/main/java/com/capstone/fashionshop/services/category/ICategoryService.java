@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ICategoryService {
     ResponseEntity<?> findAll();
-    ResponseEntity<?> findRoot();
+    ResponseEntity<?> findRoot(Boolean root);
     ResponseEntity<?> findCategoryById(String id);
     ResponseEntity<?> addCategory(CategoryReq req);
     ResponseEntity<?> updateCategory(String id, CategoryReq req);

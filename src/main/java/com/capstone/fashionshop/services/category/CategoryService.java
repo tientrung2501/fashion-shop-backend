@@ -39,8 +39,10 @@ public class CategoryService implements ICategoryService {
     }
 
     @Override
-    public ResponseEntity<?> findRoot() {
-        List<Category> list = categoryRepository.findAllByRoot(true);
+    public ResponseEntity<?> findRoot(Boolean root) {
+        List<Category> list;
+        if (root) list = categoryRepository.findAllByRoot(true);
+        else list = categoryRepository.findAllByState(Constants.ENABLE);
         if (list.size() > 0)
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Get all root category success", list));

@@ -2,8 +2,6 @@ package com.capstone.fashionshop.controllers;
 
 import com.capstone.fashionshop.payload.request.CategoryReq;
 import com.capstone.fashionshop.services.category.ICategoryService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +17,8 @@ public class CategoryController {
     private final ICategoryService categoryService;
 
     @GetMapping(path = "/categories")
-    public ResponseEntity<?> findRoot (){
-        return categoryService.findRoot();
+    public ResponseEntity<?> findRoot (@RequestParam(value = "root", defaultValue = "true") Boolean root){
+        return categoryService.findRoot(root);
     }
 
     @GetMapping(path = "/categories/{id}")
