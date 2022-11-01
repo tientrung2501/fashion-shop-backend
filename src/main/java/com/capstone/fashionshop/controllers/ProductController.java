@@ -1,5 +1,6 @@
 package com.capstone.fashionshop.controllers;
 
+import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.models.entities.product.ProductAttribute;
 import com.capstone.fashionshop.payload.request.ImageReq;
@@ -43,12 +44,13 @@ public class ProductController {
 
     @GetMapping(path = "/products")
     public ResponseEntity<?> findAllByState (@ParameterObject Pageable pageable){
-        return productService.findAll(false, pageable);
+        return productService.findAll(Constants.ENABLE, pageable);
     }
 
     @GetMapping(path = "/manage/products")
-    public ResponseEntity<?> findAll (@ParameterObject Pageable pageable){
-        return productService.findAll(true,pageable);
+    public ResponseEntity<?> findAll (@RequestParam(value = "state", defaultValue = "") String state,
+                                      @ParameterObject Pageable pageable){
+            return productService.findAll(state,pageable);
     }
 
     @PostMapping("/manage/products")

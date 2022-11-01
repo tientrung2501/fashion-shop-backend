@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface IProductService {
-    ResponseEntity<?> findAll(boolean isAdmin, Pageable pageable);
+    ResponseEntity<?> findAll(String state, Pageable pageable);
     ResponseEntity<?> findById(String id);
     ResponseEntity<?> findByCategoryIdOrBrandId(String catId, Pageable pageable);
     ResponseEntity<?> search(String key, Pageable pageable);

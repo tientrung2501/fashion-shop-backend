@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface IUserService {
-    ResponseEntity<?> findAll(Pageable pageable);
+    ResponseEntity<?> findAll(String state, Pageable pageable);
     ResponseEntity<?> findUserById(String id);
     ResponseEntity<?> getUserOrderHistory(String id);
     ResponseEntity<?> addUser(RegisterReq req);

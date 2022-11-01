@@ -27,8 +27,9 @@ public class UserController {
     private final JwtUtils jwtUtils;
 
     @GetMapping(path = "/admin/manage/users")
-    public ResponseEntity<?> findAll (@PageableDefault(size = 5, sort = "state") @ParameterObject Pageable pageable){
-        return userService.findAll(pageable);
+    public ResponseEntity<?> findAll (@RequestParam(value = "state", defaultValue = "") String state,
+                                      @PageableDefault(size = 5, sort = "name") @ParameterObject Pageable pageable){
+        return userService.findAll(state, pageable);
     }
 
     @PostMapping(path = "/admin/manage/users")

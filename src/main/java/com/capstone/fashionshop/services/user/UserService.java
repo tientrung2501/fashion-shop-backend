@@ -40,8 +40,13 @@ public class UserService implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final OrderMapper orderMapper;
     @Override
-    public ResponseEntity<?> findAll(Pageable pageable) {
-        Page<User> users = userRepository.findAll(pageable);
+    public ResponseEntity<?> findAll(String state, Pageable pageable) {
+        Page<User> users;
+        if (state.equalsIgnoreCase(Constants.USER_STATE_ACTIVATED) ||
+                state.equalsIgnoreCase(Constants.USER_STATE_DEACTIVATED) ||
+                state.equalsIgnoreCase(Constants.USER_STATE_UNVERIFIED))
+            users = userRepository.findAllByState(state.toLowerCase(), pageable);
+        else users = userRepository.findAll(pageable);
         List<UserRes> userResList = users.stream().map(userMapper::toUserRes).collect(Collectors.toList());
         Map<String, Object> resp = new HashMap<>();
         resp.put("list", userResList);

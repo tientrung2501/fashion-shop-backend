@@ -46,10 +46,11 @@ public class ProductService implements IProductService {
     private final ProductMapper productMapper;
     private final CloudinaryConfig cloudinary;
     @Override
-    public ResponseEntity<?> findAll(boolean isAdmin, Pageable pageable) {
+    public ResponseEntity<?> findAll(String state, Pageable pageable) {
         Page<Product> products;
-        if (isAdmin) products = productRepository.findAll(pageable);
-        else products = productRepository.findAllByState(Constants.ENABLE, pageable);
+        if (state.equalsIgnoreCase(Constants.ENABLE) || state.equalsIgnoreCase(Constants.DISABLE))
+            products = productRepository.findAllByState(state.toLowerCase(), pageable);
+        else products = productRepository.findAll(pageable);
         List<ProductListRes> resList = products.getContent().stream().map(productMapper::toProductListRes).collect(Collectors.toList());
         ResponseEntity<?> resp = addPageableToRes(products, resList);
         if (resp != null) return resp;
