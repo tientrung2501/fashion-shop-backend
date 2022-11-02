@@ -26,7 +26,9 @@ public class ProductListRes {
     private double rate;
     private int rateCount;
     private String category;
+    private String categoryName;
     private String brand;
+    private String brandName;
     private String state;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     LocalDateTime createdDate;
