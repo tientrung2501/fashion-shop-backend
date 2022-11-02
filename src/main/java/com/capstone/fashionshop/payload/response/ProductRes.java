@@ -24,10 +24,10 @@ public class ProductRes {
     private int discount;
     private double rate;
     private int rateCount;
-    private String categoryId;
     private String category;
-    private String brandId;
+    private String categoryName;
     private String brand;
+    private String brandName;
     private String state;
     private List<ProductAttribute> attr;
     private List<ProductOption> options;
