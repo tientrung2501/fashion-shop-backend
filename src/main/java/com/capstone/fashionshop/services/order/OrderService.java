@@ -23,9 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -43,8 +41,12 @@ public class OrderService implements IOrderService {
         else orders = orderRepository.findAllByState(state, pageable);
         if (orders.isEmpty()) throw new NotFoundException("Can not found any orders");
         List<OrderRes> resList = orders.stream().map(orderMapper::toOrderRes).collect(Collectors.toList());
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("list", resList);
+        resp.put("totalQuantity", orders.getTotalElements());
+        resp.put("totalPage", orders.getTotalPages());
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject(true, "Get orders success", resList));
+                new ResponseObject(true, "Get orders success", resp));
     }
 
     @Override
