@@ -1,17 +1,23 @@
 package com.capstone.fashionshop.models.entities.product;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.springframework.data.mongodb.core.mapping.FieldType.DECIMAL128;
 
 @Document(collection = "product_option")
 @Getter
@@ -25,6 +31,7 @@ public class ProductOption {
     @TextIndexed(weight = 9)
     private String name;
     private List<ProductVariant> variants = new ArrayList<>();
+    @Field(targetType = DECIMAL128)
     private BigDecimal extraFee;
     @DocumentReference(lazy = true)
     @JsonIgnore

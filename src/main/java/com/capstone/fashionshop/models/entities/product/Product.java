@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
+import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.TextScore;
 
 import javax.validation.constraints.NotBlank;
@@ -22,6 +23,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.springframework.data.mongodb.core.mapping.FieldType.DECIMAL128;
 
 @Document(collection = "products")
 @Getter@Setter
@@ -38,6 +41,7 @@ public class Product {
     @TextIndexed(weight = 1)
     private String description;
     @NotNull(message = "Price is required")
+    @Field(targetType = DECIMAL128)
     private BigDecimal price;
     @NotNull(message = "Discount is required")
     @Range(min = 0, max = 100, message = "Invalid discount! Only from 0 to 100")
@@ -79,6 +83,11 @@ public class Product {
         this.brand = brand;
         this.state = state;
         this.discount = discount;
+    }
+
+    public Product(List<ProductAttribute> attr, String state) {
+        this.attr = attr;
+        this.state = state;
     }
 
     @Transient
