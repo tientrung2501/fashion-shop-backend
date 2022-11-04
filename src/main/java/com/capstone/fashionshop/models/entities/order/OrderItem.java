@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class OrderItem {
     @Id
     private String id;
-    @DocumentReference(lazy = true)
+    @DocumentReference
     private ProductOption item;
     @NotBlank
     private String color;
