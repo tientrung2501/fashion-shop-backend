@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.Optional;
 
 @Service
@@ -54,7 +55,7 @@ public class PaymentService {
             if (order.isEmpty() || !order.get().getId().equals(id)) {
                 throw new NotFoundException("Can not found any order with id: " + id);
             }
-            PaymentDetail paymentDetail = new PaymentDetail(null,paymentType.toUpperCase(),"", null);
+            PaymentDetail paymentDetail = new PaymentDetail(null,paymentType.toUpperCase(),"", new HashMap<>());
             order.get().setPaymentDetail(paymentDetail);
             DeliveryDetail deliveryDetail = new DeliveryDetail(req.getName(), req.getPhone(),
                     req.getProvince(), req.getDistrict(), req.getWard(),req.getAddress());
