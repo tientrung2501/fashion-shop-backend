@@ -33,8 +33,8 @@ public class OrderController {
     }
 
     @GetMapping(path = "/admin/manage/orders/stats")
-    public ResponseEntity<?> getStats (@RequestParam(value = "from", required = false) String from,
-                                       @RequestParam(value = "to", required = false) String to,
+    public ResponseEntity<?> getStats (@RequestParam(value = "from", defaultValue = "") String from,
+                                       @RequestParam(value = "to", defaultValue = "") String to,
                                        @RequestParam("type") String type){
         return orderService.getOrderStatistical(from, to, type);
     }
