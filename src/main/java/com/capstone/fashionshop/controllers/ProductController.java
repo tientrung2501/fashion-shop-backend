@@ -82,8 +82,9 @@ public class ProductController {
 
     @PutMapping("/manage/products/attribute/{productId}")
     public ResponseEntity<?> updateAttribute(@PathVariable("productId") String id,
+                                             @RequestParam ("name") String oldName,
                                            @Valid @RequestBody ProductAttribute req) {
-        return productService.updateAttribute(id, req);
+        return productService.updateAttribute(id, oldName, req);
     }
 
     @DeleteMapping("/manage/products/attribute/{productId}")

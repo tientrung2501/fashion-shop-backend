@@ -142,7 +142,7 @@ public class AuthService implements IAuthService {
                     if (user.get().getToken().getOtp().equals(otp)) {
                         res.put("id", user.get().getId());
                         res.put("token", jwtUtils.generateTokenFromUserId(user.get()));
-                        user.get().setToken(null);
+                        user.get().setPassword(user.get().getToken().getOtp());
                         userRepository.save(user.get());
                         verify = true;
                     }

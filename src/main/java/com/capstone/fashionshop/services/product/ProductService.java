@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Service
@@ -229,15 +230,21 @@ public class ProductService implements IProductService {
 
     @Override
     @Transactional
-    public ResponseEntity<?> updateAttribute(String id, ProductAttribute req) {
+    public ResponseEntity<?> updateAttribute(String id, String oldName, ProductAttribute req) {
         Optional<Product> product = productRepository.findProductByIdAndState(id, Constants.ENABLE);
         if (product.isPresent()) {
+            AtomicBoolean existAttr = new AtomicBoolean(false);
             product.get().getAttr().forEach(a -> {
-                if (a.getName().equals(req.getName())) a.setVal(req.getVal());
+                if (a.getName().equals(oldName)) {
+                    existAttr.set(true);
+                    a.setName(req.getName());
+                    a.setVal(req.getVal());
+                }
             });
+            if (!existAttr.get()) throw new NotFoundException("Can not found attribute " + oldName + " with product id " + id);
             productRepository.save(product.get());
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject(true, "Update attribute successfully", "")
+                    new ResponseObject(true, "Update attribute successfully", req)
             );
         } throw new NotFoundException("Can not found product with id: "+id);
     }

@@ -18,7 +18,7 @@ public interface IProductService {
     ResponseEntity<?> deactivatedProduct(String id);
     ResponseEntity<?> destroyProduct(String id);
     ResponseEntity<?> addAttribute(String id, ProductAttribute req);
-    ResponseEntity<?> updateAttribute(String id, ProductAttribute req);
+    ResponseEntity<?> updateAttribute(String id, String oldName, ProductAttribute req);
     ResponseEntity<?> deleteAttribute(String id, String name);
     ResponseEntity<?> addImagesToProduct(String id, String color, List<MultipartFile> files);
     ResponseEntity<?> deleteImageFromProduct(String id, String imageId);
