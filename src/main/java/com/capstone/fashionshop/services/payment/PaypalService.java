@@ -87,7 +87,7 @@ public class PaypalService extends PaymentFactory{
                     order.get().getPaymentDetail().getPaymentInfo().put("payer", payment.getPayer().getPayerInfo());
                     order.get().getPaymentDetail().getPaymentInfo().put("paymentMethod", payment.getPayer().getPaymentMethod());
                     order.get().getPaymentDetail().getPaymentInfo().put("isPaid", true);
-                    order.get().setState(Constants.ORDER_STATE_PAID);
+                    order.get().setState(Constants.ORDER_STATE_DELIVERY);
                     orderRepository.save(order.get());
                 }
                 response.sendRedirect(PaymentService.CLIENT_REDIRECT + "true&cancel=false");

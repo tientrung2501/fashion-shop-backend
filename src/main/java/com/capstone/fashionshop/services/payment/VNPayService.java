@@ -80,7 +80,7 @@ public class VNPayService extends PaymentFactory {
             order.get().getPaymentDetail().getPaymentInfo().put("bankCode", request.getParameter("vnp_BankCode"));
             order.get().getPaymentDetail().getPaymentInfo().put("transactionNo", request.getParameter("vnp_TransactionNo"));
             order.get().getPaymentDetail().getPaymentInfo().put("isPaid", true);
-            order.get().setState(Constants.ORDER_STATE_PAID);
+            order.get().setState(Constants.ORDER_STATE_DELIVERY);
             orderRepository.save(order.get());
             response.sendRedirect(PaymentService.CLIENT_REDIRECT + "true&cancel=false");
             return ResponseEntity.status(HttpStatus.OK).body(

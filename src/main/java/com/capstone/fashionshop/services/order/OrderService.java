@@ -76,21 +76,16 @@ public class OrderService implements IOrderService {
         Optional<Order> order = orderRepository.findById(id);
         if (order.isPresent() && order.get().getUser().getId().equals(userId)) {
             if (order.get().getState().equals(Constants.ORDER_STATE_PENDING) ||
-                    order.get().getState().equals(Constants.ORDER_STATE_PROCESS) ||
-                    order.get().getState().equals(Constants.ORDER_STATE_PAID)) {
-                order.get().setState(Constants.ORDER_STATE_CANCEL);
-                if (order.get().getState().equals(Constants.ORDER_STATE_PAID)) {
-                    //refund
-                    order.get().getPaymentDetail().getPaymentInfo().put("refund", true);
-                }
-                orderRepository.save(order.get());
+                    order.get().getState().equals(Constants.ORDER_STATE_PROCESS)) {
                 String checkUpdateQuantityProduct = paymentUtils.checkingUpdateQuantityProduct(order.get(), false);
+                order.get().setState(Constants.ORDER_STATE_CANCEL);
+                orderRepository.save(order.get());
                 if (checkUpdateQuantityProduct == null) {
                     return ResponseEntity.status(HttpStatus.OK).body(
                             new ResponseObject(true, "Cancel order successfully", ""));
                 }
             } else throw new AppException(HttpStatus.BAD_REQUEST.value(),
-                    "You cannot cancel or refund while the order is still processing!");
+                    "You cannot cancel while the order is still processing!");
         }
         throw new NotFoundException("Can not found order with id: " + id);
     }
@@ -109,10 +104,10 @@ public class OrderService implements IOrderService {
             e.printStackTrace();
             throw new AppException(HttpStatus.BAD_REQUEST.value(), "Incorrect date format");
         }
-        Page<Order> orderList = orderRepository.findAllByCreatedDateBetweenAndState(fromDate, toDate, Constants.ORDER_STATE_PAID, Pageable.unpaged());
+        Page<Order> orderList = orderRepository.findAllByCreatedDateBetweenAndState(fromDate, toDate, Constants.ORDER_STATE_DONE, Pageable.unpaged());
         switch (type) {
             case "all":
-                orderList = orderRepository.findAllByState(Constants.ORDER_STATE_PAID, PageRequest.of(0, Integer.MAX_VALUE, Sort.by("lastModifiedDate").ascending()));
+                orderList = orderRepository.findAllByState(Constants.ORDER_STATE_DONE, PageRequest.of(0, Integer.MAX_VALUE, Sort.by("lastModifiedDate").ascending()));
                 pattern = "";
                 break;
             case "month":

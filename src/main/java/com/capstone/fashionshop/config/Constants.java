@@ -15,7 +15,7 @@ public class Constants {
     public static final String ORDER_STATE_ENABLE = "enable";
     public static final String ORDER_STATE_CANCEL = "cancel";
     public static final String ORDER_STATE_PROCESS = "process";
-    public static final String ORDER_STATE_PAID = "paid";
+    public static final String ORDER_STATE_DONE = "done";
     public static final String ORDER_STATE_DELIVERY = "delivery";
     public static final String ORDER_STATE_PENDING = "pending";
     //PAYMENT TYPE
