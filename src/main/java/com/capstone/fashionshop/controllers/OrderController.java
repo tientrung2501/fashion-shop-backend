@@ -21,18 +21,18 @@ public class OrderController {
     private final IOrderService orderService;
     private final JwtUtils jwtUtils;
 
-    @GetMapping(path = "/admin/manage/orders")
+    @GetMapping(path = "/manage/orders")
     public ResponseEntity<?> findAll (@RequestParam(defaultValue = "") String state,
                                       @PageableDefault(size = 5, sort = "lastModifiedDate") @ParameterObject Pageable pageable){
         return orderService.findAll(state, pageable);
     }
 
-    @GetMapping(path = "/admin/manage/orders/{orderId}")
+    @GetMapping(path = "/manage/orders/{orderId}")
     public ResponseEntity<?> findOrderById (@PathVariable String orderId){
         return orderService.findOrderById(orderId);
     }
 
-    @GetMapping(path = "/admin/manage/orders/stats")
+    @GetMapping(path = "/manage/orders/stats")
     public ResponseEntity<?> getStats (@RequestParam(value = "from", defaultValue = "") String from,
                                        @RequestParam(value = "to", defaultValue = "") String to,
                                        @RequestParam("type") String type){
