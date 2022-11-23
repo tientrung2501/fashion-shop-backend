@@ -32,10 +32,12 @@ public class Category {
     private boolean root = true;
     private String state;
     @DocumentReference
+    @Indexed
     private List<Category> subCategories = new ArrayList<>();
     @ReadOnlyProperty
     @DocumentReference(lookup="{'category':?#{#self._id} }", lazy = true)
     @JsonIgnore
+    @Indexed
     private List<Product> products;
 
     public Category(String name, String image, String state) {

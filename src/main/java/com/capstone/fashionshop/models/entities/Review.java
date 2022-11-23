@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
@@ -28,9 +29,11 @@ public class Review {
     private double rate;
     @DocumentReference(lazy = true)
     @JsonIgnore
+    @Indexed
     private Product product;
     @DocumentReference(lazy = true)
     @JsonIgnore
+    @Indexed
     private User user;
     private boolean enable;
     @CreatedDate

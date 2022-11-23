@@ -32,13 +32,6 @@ public class OrderController {
         return orderService.findOrderById(orderId);
     }
 
-    @GetMapping(path = "/manage/orders/stats")
-    public ResponseEntity<?> getStats (@RequestParam(value = "from", defaultValue = "") String from,
-                                       @RequestParam(value = "to", defaultValue = "") String to,
-                                       @RequestParam("type") String type){
-        return orderService.getOrderStatistical(from, to, type);
-    }
-
     @GetMapping(path = "/orders/{orderId}")
     public ResponseEntity<?> userFindOrderById (@PathVariable String orderId,
                                                 HttpServletRequest request){

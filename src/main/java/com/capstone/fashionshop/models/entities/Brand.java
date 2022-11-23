@@ -27,6 +27,7 @@ public class Brand {
     private String state;
     @DocumentReference(lookup="{'brand':?#{#self._id} }", lazy = true)
     @JsonIgnore
+    @Indexed
     private List<Product> products;
 
     public Brand(String name, String image, String state) {

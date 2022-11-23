@@ -47,24 +47,27 @@ public class Product {
     @Range(min = 0, max = 100, message = "Invalid discount! Only from 0 to 100")
     private int discount = 0;
     @NotBlank(message = "Category is required")
-    @DocumentReference
+    @DocumentReference(lazy = true)
+    @Indexed
     private Category category;
     @NotBlank(message = "Brand is required")
-    @DocumentReference
+    @DocumentReference(lazy = true)
+    @Indexed
     private Brand brand;
     private double rate = 0;
     @TextIndexed(weight = 8)
     private List<ProductAttribute> attr = new ArrayList<>();
     @NotBlank(message = "State is required")
+    @Indexed
     private String state;
     @ReadOnlyProperty
     @DocumentReference(lookup="{'product':?#{#self._id} }", lazy = true)
+    @Indexed
     private List<ProductOption> productOptions;
-//    @ReadOnlyProperty
-//    @DocumentReference(lookup="{'product':?#{#self._id} }", lazy = true)
     private List<ProductImage> images = new ArrayList<>();
     @ReadOnlyProperty
     @DocumentReference(lookup="{'product':?#{#self._id} }", lazy = true)
+    @Indexed
     private List<Review> reviews;
     @CreatedDate
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")

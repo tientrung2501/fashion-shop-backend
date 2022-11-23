@@ -8,6 +8,7 @@ import com.capstone.fashionshop.models.entities.order.DeliveryDetail;
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.models.entities.order.PaymentDetail;
 import com.capstone.fashionshop.payload.request.CheckoutReq;
+import com.capstone.fashionshop.repository.OrderItemRepository;
 import com.capstone.fashionshop.repository.OrderRepository;
 import com.capstone.fashionshop.repository.UserRepository;
 import com.capstone.fashionshop.security.jwt.JwtUtils;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -33,6 +35,7 @@ public class PaymentService {
 
     private final ApplicationContext context;
     private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
     private final JwtUtils jwtTokenUtil;
     private final UserRepository userRepository;
 
@@ -61,6 +64,11 @@ public class PaymentService {
                     req.getProvince(), req.getDistrict(), req.getWard(),req.getAddress());
             order.get().setDeliveryDetail(deliveryDetail);
             order.get().setState(Constants.ORDER_STATE_PROCESS);
+            order.get().getItems().forEach(item -> item.setPrice(new BigDecimal((item.getItem().getProduct().getPrice()
+                    .add(item.getItem().getExtraFee()))
+                    .multiply(BigDecimal.valueOf((double) (100- item.getItem().getProduct().getDiscount())/100))
+                    .stripTrailingZeros().toPlainString())));
+            orderItemRepository.saveAll(order.get().getItems());
             orderRepository.save(order.get());
         } catch (NotFoundException e) {
             log.error(e.getMessage());

@@ -9,6 +9,7 @@ import com.capstone.fashionshop.payload.response.CartRes;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -23,11 +24,13 @@ public class CartMapper {
     public static CartItemRes toCartItemRes(OrderItem orderItem) {
         Optional<ProductImage> image = Optional.ofNullable(orderItem.getItem().getProduct().getImages().stream().filter(x -> x.isThumbnail() && x.getColor().equals(orderItem.getColor())).findFirst()
                 .orElse(orderItem.getItem().getProduct().getImages().get(0)));
+        BigDecimal price = orderItem.getPrice();
+        if (price.equals(BigDecimal.ZERO))
+            price = orderItem.getItem().getProduct().getPrice().add(orderItem.getItem().getExtraFee());
         try {
             return new CartItemRes(orderItem.getId(), orderItem.getItem().getProduct().getName(),
                     orderItem.getItem().getProduct().getDiscount(),
-                    image.get().getUrl(),
-                    orderItem.getItem().getProduct().getPrice().add(orderItem.getItem().getExtraFee()),
+                    image.get().getUrl(), price,
                     orderItem.getItem().getId(), orderItem.getColor(), orderItem.getItem().getName(),
                     orderItem.getQuantity(), orderItem.getItem().getVariants().get(0).getStock(), orderItem.getSubPrice());
         } catch (Exception e) {

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
@@ -35,6 +36,7 @@ public class ProductOption {
     private BigDecimal extraFee;
     @DocumentReference(lazy = true)
     @JsonIgnore
+    @Indexed
     private Product product;
     @Transient
     private Long inStock;

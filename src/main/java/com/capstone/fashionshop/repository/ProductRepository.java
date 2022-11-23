@@ -1,10 +1,12 @@
 package com.capstone.fashionshop.repository;
 
 import com.capstone.fashionshop.models.entities.product.Product;
+import com.capstone.fashionshop.payload.aggregate.StateCountAggregate;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.TextCriteria;
+import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -22,4 +24,6 @@ public interface ProductRepository extends MongoRepository<Product, String> {
     Page<Product> findProductsByCategory(ObjectId id, List<ObjectId> subCat, Pageable pageable);
     Page<Product> findAllBy(TextCriteria textCriteria, Pageable pageable);
     List<Product> findAllByIdIsIn(List<String> productIds);
+    @Aggregation("{ $group: { _id : $state, count: { $sum: 1 } } }")
+    List<StateCountAggregate> countAllByState();
 }

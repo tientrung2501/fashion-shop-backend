@@ -42,14 +42,14 @@ public class ProductMapper {
                     .filter(ProductImage::isThumbnail).distinct().collect(Collectors.toList());
             if (images.isEmpty()) images = req.getImages();
         }
-//        HashSet<Object> seen=new HashSet<>();
-//        images.removeIf(e->!seen.add(e.getImageId()));
-
-        String discountString = req.getPrice().multiply(BigDecimal.valueOf((double) (100- req.getDiscount())/100))
+        BigDecimal extra = BigDecimal.ZERO;
+        if (!req.getAttr().isEmpty()) extra = req.getProductOptions().get(0).getExtraFee();
+        String discountString = (req.getPrice().add(extra)).multiply(BigDecimal.valueOf((double) (100- req.getDiscount())/100))
                 .stripTrailingZeros().toPlainString();
         BigDecimal discountPrice = new BigDecimal(discountString);
         return new ProductListRes(req.getId(), req.getName(), req.getDescription(),
-                req.getPrice(),discountPrice, req.getDiscount(), req.getRate(), req.getRateCount(), req.getCategory().getId(),
+                req.getPrice().add(extra),discountPrice, req.getDiscount(), req.getRate(),
+                req.getRateCount(), req.getCategory().getId(),
                 req.getCategory().getName(), req.getBrand().getId(),
                 req.getBrand().getName(), req.getState(), req.getCreatedDate(), req.getAttr(), images);
     }
