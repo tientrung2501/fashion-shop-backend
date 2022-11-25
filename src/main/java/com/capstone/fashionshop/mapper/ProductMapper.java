@@ -49,9 +49,9 @@ public class ProductMapper {
         BigDecimal discountPrice = new BigDecimal(discountString);
         return new ProductListRes(req.getId(), req.getName(), req.getDescription(),
                 req.getPrice().add(extra),discountPrice, req.getDiscount(), req.getRate(),
-                req.getRateCount(), "req.getCategory().getId()",
-                "req.getCategory().getName()", "req.getBrand().getId()",
-                "req.getBrand().getName()", req.getState(), req.getCreatedDate(), req.getAttr(), images);
+                req.getRateCount(), req.getCategory().getId(),
+                req.getCategory().getName(), req.getBrand().getId(),
+                req.getBrand().getName(), req.getState(), req.getCreatedDate(), req.getAttr(), images);
     }
 
     public ProductRes toProductRes(Product req) {
