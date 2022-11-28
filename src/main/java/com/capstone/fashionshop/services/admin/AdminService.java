@@ -40,36 +40,28 @@ public class AdminService implements IAdminService{
     public ResponseEntity<?> getAllCountByState() {
         Map<String, Object> resp = new HashMap<>();
         try {
-            Map<String, Object> order = new HashMap<>();
-            List<StateCountAggregate> orderAgg = orderRepository.countAllByState();
-            order.put("list", orderAgg);
-            order.put("totalQuantity", orderAgg.stream().map(StateCountAggregate::getCount).reduce(0L, Long::sum));
+            Map<String, Object> order = processResponse(orderRepository.countAllByState());
             resp.put("order", order);
-            Map<String, Object> product = new HashMap<>();
-            List<StateCountAggregate> productAgg = productRepository.countAllByState();
-            product.put("list", productAgg);
-            product.put("totalQuantity", productAgg.stream().map(StateCountAggregate::getCount).reduce(0L, Long::sum));
+            Map<String, Object> product = processResponse(productRepository.countAllByState());
             resp.put("product", product);
-            Map<String, Object> user = new HashMap<>();
-            List<StateCountAggregate> userAgg = userRepository.countAllByState();
-            user.put("list", userAgg);
-            user.put("totalQuantity", userAgg.stream().map(StateCountAggregate::getCount).reduce(0L, Long::sum));
+            Map<String, Object> user = processResponse(userRepository.countAllByState());
             resp.put("user", user);
-            Map<String, Object> category = new HashMap<>();
-            List<StateCountAggregate> categoryAgg = categoryRepository.countAllByState();
-            category.put("list", categoryAgg);
-            category.put("totalQuantity", categoryAgg.stream().map(StateCountAggregate::getCount).reduce(0L, Long::sum));
+            Map<String, Object> category = processResponse(categoryRepository.countAllByState());
             resp.put("category", category);
-            Map<String, Object> brand = new HashMap<>();
-            List<StateCountAggregate> brandAgg = brandRepository.countAllByState();
-            brand.put("list", brandAgg);
-            brand.put("totalQuantity", brandAgg.stream().map(StateCountAggregate::getCount).reduce(0L, Long::sum));
+            Map<String, Object> brand = processResponse(brandRepository.countAllByState());
             resp.put("brand", brand);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Get count by state success", resp));
         } catch (Exception e) {
             throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), e.getMessage());
         }
+    }
+
+    private Map<String, Object> processResponse(List<StateCountAggregate> stateCountAggregates) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", stateCountAggregates);
+        result.put("totalQuantity", stateCountAggregates.stream().map(StateCountAggregate::getCount).reduce(0L, Long::sum));
+        return result;
     }
 
     @Override
