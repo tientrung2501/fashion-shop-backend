@@ -18,6 +18,7 @@ public class OrderMapper {
                 order.getTotalProduct(), order.getTotalPrice(), order.getState(), order.getLastModifiedDate());
         orderRes.setItems(order.getItems().stream().map(CartMapper::toCartItemRes).collect(Collectors.toList()));
         orderRes.setPaymentType(order.getPaymentDetail().getPaymentType());
+        orderRes.setPaymentInfo(order.getPaymentDetail().getPaymentInfo());
         orderRes.setDeliveryDetail(order.getDeliveryDetail());
         return orderRes;
     }
