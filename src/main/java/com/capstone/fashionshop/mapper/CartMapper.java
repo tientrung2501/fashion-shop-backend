@@ -6,6 +6,7 @@ import com.capstone.fashionshop.models.entities.order.OrderItem;
 import com.capstone.fashionshop.models.entities.product.ProductImage;
 import com.capstone.fashionshop.payload.response.CartItemRes;
 import com.capstone.fashionshop.payload.response.CartRes;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class CartMapper {
     public CartRes toCartRes (Order order) {
         CartRes res = new CartRes(order.getId(), order.getTotalProduct(), order.getTotalPrice(), order.getState());
@@ -27,6 +29,7 @@ public class CartMapper {
         BigDecimal price = orderItem.getPrice();
         if (price.equals(BigDecimal.ZERO))
             price = orderItem.getItem().getProduct().getPrice().add(orderItem.getItem().getExtraFee());
+        System.out.println(orderItem.getItem().getVariants());
         try {
             return new CartItemRes(orderItem.getId(), orderItem.getItem().getProduct().getName(),
                     orderItem.getItem().getProduct().getDiscount(),
@@ -34,6 +37,7 @@ public class CartMapper {
                     orderItem.getItem().getId(), orderItem.getColor(), orderItem.getItem().getName(),
                     orderItem.getQuantity(), orderItem.getItem().getVariants().get(0).getStock(), orderItem.getSubPrice());
         } catch (Exception e) {
+            log.error(e.getMessage());
             throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "get cart item failed");
         }
     }
