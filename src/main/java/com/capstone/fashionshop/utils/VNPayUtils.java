@@ -1,7 +1,5 @@
 package com.capstone.fashionshop.utils;
 
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
@@ -10,7 +8,7 @@ import java.util.List;
 
 public class VNPayUtils {
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_Returnurl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString() +
+    public static String vnp_Returnurl =
             "/api/checkout/vnpay/success";
     public static String vnp_HashSecret = "CYRZSLSDARTODVXSOAOSGJMZULNPUQZI";
     public static String vnp_apiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/merchant.html";

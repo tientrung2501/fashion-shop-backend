@@ -22,7 +22,7 @@ public class StringUtils {
         int serverPort = request.getServerPort();
         String contextPath = request.getContextPath();
         StringBuffer url =  new StringBuffer();
-        url.append(scheme).append("://").append(serverName);
+        url.append(scheme).append("s://").append(serverName);
         if ((serverPort != 80) && (serverPort != 443)) {
             url.append(":").append(serverPort);
         }

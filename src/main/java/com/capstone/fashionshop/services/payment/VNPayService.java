@@ -6,6 +6,7 @@ import com.capstone.fashionshop.exception.NotFoundException;
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.repository.OrderRepository;
+import com.capstone.fashionshop.utils.StringUtils;
 import com.capstone.fashionshop.utils.VNPayUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -118,7 +119,7 @@ public class VNPayService extends PaymentFactory {
         vnp_Params.put(VNPayUtils.vnp_OrderInfo_k, order.getId());
         vnp_Params.put(VNPayUtils.vnp_OrderType, VNPayUtils.vnp_orderType);
         vnp_Params.put(VNPayUtils.vnp_Locale, VNPayUtils.vn);
-        vnp_Params.put(VNPayUtils.vnp_ReturnUrl, VNPayUtils.vnp_Returnurl);
+        vnp_Params.put(VNPayUtils.vnp_ReturnUrl, StringUtils.getBaseURL(request) + VNPayUtils.vnp_Returnurl);
         vnp_Params.put(VNPayUtils.vnp_IpAddr, vnp_IpAddr);
         vnp_Params.put(VNPayUtils.vnp_Amount, total);
 

@@ -10,12 +10,12 @@ import java.util.stream.Collectors;
 public class OrderMapper {
     public OrderRes toOrderRes (Order order) {
         return new OrderRes(order.getId(), order.getUser().getId(), order.getUser().getName(),
-                order.getTotalProduct(), order.getTotalPrice(), order.getState());
+                order.getTotalProduct(), order.getTotalPrice(), order.getState(), order.getLastModifiedDate());
     }
 
     public OrderRes toOrderDetailRes (Order order) {
         OrderRes orderRes =  new OrderRes(order.getId(), order.getUser().getId(), order.getUser().getName(),
-                order.getTotalProduct(), order.getTotalPrice(), order.getState());
+                order.getTotalProduct(), order.getTotalPrice(), order.getState(), order.getLastModifiedDate());
         orderRes.setItems(order.getItems().stream().map(CartMapper::toCartItemRes).collect(Collectors.toList()));
         orderRes.setPaymentType(order.getPaymentDetail().getPaymentType());
         orderRes.setDeliveryDetail(order.getDeliveryDetail());
