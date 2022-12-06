@@ -29,7 +29,6 @@ public class CartMapper {
         BigDecimal price = orderItem.getPrice();
         if (price.equals(BigDecimal.ZERO))
             price = orderItem.getItem().getProduct().getPrice().add(orderItem.getItem().getExtraFee());
-        System.out.println(orderItem.getItem().getVariants());
         try {
             return new CartItemRes(orderItem.getId(), orderItem.getItem().getProduct().getName(),
                     orderItem.getItem().getProduct().getDiscount(),

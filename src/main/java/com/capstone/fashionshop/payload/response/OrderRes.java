@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,11 +26,11 @@ public class OrderRes {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private DeliveryDetail deliveryDetail;
     private String state;
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
-    private LocalDateTime createdDate;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
+    private Object createdDate;
     private Map<String, Object> paymentInfo;
 
-    public OrderRes(String id, String userId, String userName, long totalProduct, BigDecimal totalPrice, String state, LocalDateTime createdDate) {
+    public OrderRes(String id, String userId, String userName, long totalProduct, BigDecimal totalPrice, String state, Object createdDate) {
         this.id = id;
         this.userId = userId;
         this.userName = userName;

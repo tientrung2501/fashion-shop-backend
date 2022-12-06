@@ -1,6 +1,5 @@
 package com.capstone.fashionshop.security.user;
 
-import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -19,9 +18,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findUserByEmailAndState(email, Constants.USER_STATE_ACTIVATED);
+        Optional<User> user = userRepository.findUserByEmail(email);
         if (user.isEmpty()) {
-            throw new UsernameNotFoundException("User Not Found with user id: " + email);
+            throw new UsernameNotFoundException("Can Not Found with user id: " + email);
         }
         return new CustomUserDetails(user.get());
     }

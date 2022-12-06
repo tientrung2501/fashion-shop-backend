@@ -3,10 +3,10 @@ package com.capstone.fashionshop.services.payment;
 import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.exception.NotFoundException;
-import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.models.entities.order.DeliveryDetail;
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.models.entities.order.PaymentDetail;
+import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.payload.request.CheckoutReq;
 import com.capstone.fashionshop.repository.OrderItemRepository;
 import com.capstone.fashionshop.repository.OrderRepository;
@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -58,7 +60,8 @@ public class PaymentService {
             if (order.isEmpty() || !order.get().getId().equals(id)) {
                 throw new NotFoundException("Can not found any order with id: " + id);
             }
-            PaymentDetail paymentDetail = new PaymentDetail(null,paymentType.toUpperCase(),"", new HashMap<>());
+            PaymentDetail paymentDetail = new PaymentDetail(null,paymentType.toUpperCase(), "", new HashMap<>());
+            paymentDetail.getPaymentInfo().put("orderDate", LocalDateTime.now(Clock.systemUTC()));
             order.get().setPaymentDetail(paymentDetail);
             DeliveryDetail deliveryDetail = new DeliveryDetail(req.getName(), req.getPhone(),
                     req.getProvince(), req.getDistrict(), req.getWard(),req.getAddress());

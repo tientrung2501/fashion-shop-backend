@@ -14,6 +14,6 @@ public class ReviewRes {
     private double rate;
     private boolean enable;
     private String reviewedBy;
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     private LocalDateTime createdDate;
 }

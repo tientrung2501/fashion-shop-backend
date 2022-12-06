@@ -30,7 +30,7 @@ public class ProductListRes {
     private String brand;
     private String brandName;
     private String state;
-    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss", timezone = "Asia/Ho_Chi_Minh")
     LocalDateTime createdDate;
     private List<ProductAttribute> attr;
     private List<ProductImage> images;

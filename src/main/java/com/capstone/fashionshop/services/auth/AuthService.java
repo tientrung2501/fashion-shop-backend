@@ -57,9 +57,38 @@ public class AuthService implements IAuthService {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
             if (user.getUser().getProvider().equals(EProvider.LOCAL)) {
-                String access_token = jwtUtils.generateTokenFromUserId(user.getUser());
                 LoginRes res = userMapper.toLoginRes(user.getUser());
-                res.setAccessToken(access_token);
+                if (user.getUser().getState().equals(Constants.USER_STATE_UNVERIFIED)) {
+                    try {
+                        if (req.getOtp() == null || req.getOtp().isBlank()) {
+                            sendVerifyMail(user.getUser());
+                            res.setAccessToken(Constants.USER_STATE_UNVERIFIED);
+                        } else {
+                            boolean verify = false;
+                            if (LocalDateTime.now().isBefore(user.getUser().getToken().getExp())) {
+                                if (user.getUser().getToken().getOtp().equals(req.getOtp())) {
+                                    res.setAccessToken(jwtUtils.generateTokenFromUserId(user.getUser()));
+                                    user.getUser().setState(Constants.USER_STATE_ACTIVATED);
+                                    userRepository.save(user.getUser());
+                                    verify = true;
+                                }
+                                return ResponseEntity.status(HttpStatus.OK).body(
+                                        new ResponseObject(verify, "OTP with email: " + req.getUsername() + " is " + verify, res));
+                            } else {
+                                user.getUser().setToken(null);
+                                userRepository.save(user.getUser());
+                                return ResponseEntity.status(HttpStatus.OK).body(
+                                        new ResponseObject(false, "Expired" , ""));
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.error(e.getMessage());
+                        throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), e.getMessage());
+                    }
+                } else {
+                    String access_token = jwtUtils.generateTokenFromUserId(user.getUser());
+                    res.setAccessToken(access_token);
+                }
                 return ResponseEntity.status(HttpStatus.OK).body(
                         new ResponseObject(true, "Log in successfully ", res)
                 );
