@@ -1,38 +1,58 @@
 package com.capstone.fashionshop.services.shipping;
 
 import com.capstone.fashionshop.exception.AppException;
-import com.capstone.fashionshop.payload.ResponseObject;
+import com.capstone.fashionshop.utils.HttpConnectTemplate;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.http.HttpResponse;
 
 @Service
+@Slf4j
 public class AddressAPIService {
     @Value("${app.ghn.token}")
     private String TOKEN;
-    public ResponseEntity<?> getData(String url_str) throws IOException {
-        URL url = new URL(url_str);
-        HttpURLConnection request = (HttpURLConnection) url.openConnection();
-        request.setRequestMethod("GET");
-        request.setRequestProperty("token", TOKEN);
-        request.connect();
-        if (request.getResponseCode() != HttpURLConnection.HTTP_OK)
-            throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "Failed when get address");
-        JsonObject jsonObject = JsonParser.parseReader(
-                new InputStreamReader((InputStream) request.getContent())).getAsJsonObject();
-        String result = jsonObject.get("code").getAsString();
-        System.out.println(result);
-        request.disconnect();
-        return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject(true, "Get data success", result));
+    @Value("${app.ghn.shop}")
+    private String SHOP_ID;
+
+    public ResponseEntity<?> getProvince(){
+        try {
+            HttpResponse<?> res = HttpConnectTemplate.connectToGHN("master-data/province","", TOKEN, SHOP_ID);
+            return ResponseEntity.status(res.statusCode()).body(res.body());
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "Failed when get province");
+        }
     }
+
+    public ResponseEntity<?> getDistrict(Long provinceId) {
+        try {
+            JsonObject body = new JsonObject();
+            body.addProperty("province_id", provinceId);
+            HttpResponse<?> res = HttpConnectTemplate.connectToGHN("master-data/district",
+                    body.toString(), TOKEN, SHOP_ID);
+            return ResponseEntity.status(res.statusCode()).body(res.body());
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "Failed when get district");
+        }
+    }
+
+    public ResponseEntity<?> getWard(Long districtId) {
+        try {
+            JsonObject body = new JsonObject();
+            body.addProperty("district_id", districtId);
+            HttpResponse<?> res = HttpConnectTemplate.connectToGHN("master-data/ward?district_id",
+                    body.toString(), TOKEN, SHOP_ID);
+            return ResponseEntity.status(res.statusCode()).body(res.body());
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "Failed when get ward");
+        }
+    }
+
 }

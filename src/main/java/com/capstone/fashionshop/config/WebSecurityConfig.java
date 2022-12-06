@@ -57,7 +57,9 @@ public class WebSecurityConfig {
             "/ws/**",
             //Paypal
             "/api/checkout/*/success",
-            "/api/checkout/*/cancel"
+            "/api/checkout/*/cancel",
+            //GHN
+            "/api/shipping/**",
     };
 
     private final String[] ALLOWED_GET_LIST_URLS = {
@@ -65,7 +67,6 @@ public class WebSecurityConfig {
             "/api/categories/**",
             "/api/brands/**",
             "/api/reviews/**",
-            "/api/address/**",
     };
 
     @Value("${app.allow.origin}")

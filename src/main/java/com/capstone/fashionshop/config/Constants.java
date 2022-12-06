@@ -24,6 +24,6 @@ public class Constants {
     public static final String PAYMENT_COD = "cod";
 
     //API GHN
-    public static String GHN_URL = "https://online-gateway.ghn.vn/shiip/public-api/v2";
+    public static String GHN_URL = "https://dev-online-gateway.ghn.vn/shiip/public-api/";
 
 }
