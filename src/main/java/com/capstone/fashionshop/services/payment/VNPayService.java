@@ -81,7 +81,7 @@ public class VNPayService extends PaymentFactory {
             order.get().getPaymentDetail().getPaymentInfo().put("bankCode", request.getParameter("vnp_BankCode"));
             order.get().getPaymentDetail().getPaymentInfo().put("transactionNo", request.getParameter("vnp_TransactionNo"));
             order.get().getPaymentDetail().getPaymentInfo().put("isPaid", true);
-            order.get().setState(Constants.ORDER_STATE_DELIVERY);
+            order.get().setState(Constants.ORDER_STATE_PREPARE);
             orderRepository.save(order.get());
             response.sendRedirect(PaymentService.CLIENT_REDIRECT + "true&cancel=false");
             return ResponseEntity.status(HttpStatus.OK).body(
@@ -108,7 +108,8 @@ public class VNPayService extends PaymentFactory {
     public Map<String, Object> mapVnPayParam(Order order, HttpServletRequest request) {
         String vnp_IpAddr = VNPayUtils.getIpAddress(request);
         String vnp_TxnRef = String.valueOf(System.currentTimeMillis());
-        String total = String.valueOf(order.getTotalPrice().multiply(BigDecimal.valueOf(100)));
+        String total = String.valueOf((order.getTotalPrice().add(new BigDecimal(order.getDeliveryDetail().getDeliveryInfo().get("fee").toString())))
+                .multiply(BigDecimal.valueOf(100)));
 
         Map<String, Object> vnp_Params = new HashMap<>();
         vnp_Params.put(VNPayUtils.vnp_Version_k, VNPayUtils.vnp_Version);

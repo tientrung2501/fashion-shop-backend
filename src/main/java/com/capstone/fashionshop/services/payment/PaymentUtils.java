@@ -29,7 +29,8 @@ public class PaymentUtils {
                         orderRepository.save(order);
                         throw new AppException(HttpStatus.CONFLICT.value(),
                                 "Quantity exceeds the available stock on hand at Product:" +
-                                        item.getItem().getProduct().getName());
+                                        item.getItem().getProduct().getName() +":"+item.getItem().getId()
+                                        + ":" + i.getStock());
                     } else i.setStock(i.getStock() - item.getQuantity());
                 } else i.setStock(i.getStock() + item.getQuantity());
             });

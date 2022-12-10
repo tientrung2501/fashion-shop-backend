@@ -1,7 +1,9 @@
 package com.capstone.fashionshop.controllers;
 
+import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.models.entities.user.User;
+import com.capstone.fashionshop.payload.request.CreateShippingReq;
 import com.capstone.fashionshop.security.jwt.JwtUtils;
 import com.capstone.fashionshop.services.order.IOrderService;
 import lombok.AllArgsConstructor;
@@ -30,6 +32,25 @@ public class OrderController {
     @GetMapping(path = "/manage/orders/{orderId}")
     public ResponseEntity<?> findOrderById (@PathVariable String orderId){
         return orderService.findOrderById(orderId);
+    }
+
+    @PutMapping(path = "/manage/orders/{state}/{orderId}")
+    public ResponseEntity<?> changeState (@PathVariable String state,
+                                              @PathVariable String orderId){
+        return orderService.changeState(state, orderId);
+    }
+
+    @PutMapping(path = "/orders/done/{orderId}")
+    public ResponseEntity<?> finishOrder (@PathVariable String orderId,
+                                          HttpServletRequest request){
+        User user = jwtUtils.getUserFromJWT(jwtUtils.getJwtFromHeader(request));
+        return orderService.changeState(Constants.ORDER_STATE_DONE, orderId, user.getId());
+    }
+
+    @PostMapping(path = "/manage/orders/ship/{orderId}")
+    public ResponseEntity<?> createShipOrder (@RequestBody CreateShippingReq req,
+                                              @PathVariable String orderId){
+        return orderService.createShip(req, orderId);
     }
 
     @GetMapping(path = "/orders/{orderId}")

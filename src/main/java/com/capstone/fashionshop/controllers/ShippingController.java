@@ -5,10 +5,7 @@ import com.capstone.fashionshop.services.shipping.ShippingAPIService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @AllArgsConstructor
@@ -34,5 +31,15 @@ public class ShippingController {
     @PostMapping(path = "/fee", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> calculateFee (@RequestBody ShippingReq req) {
         return shippingAPIService.calculateFee(req);
+    }
+
+    @PostMapping(path = "/service", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getService (@RequestBody ShippingReq req) {
+        return shippingAPIService.getService(req);
+    }
+
+    @PostMapping(path = "/detail/{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getDetail (@PathVariable String orderId) {
+        return shippingAPIService.getDetail(orderId);
     }
 }

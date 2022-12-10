@@ -22,4 +22,6 @@ public class CheckoutReq {
     private String ward;
     @NotBlank(message = "Address is required")
     private String address;
+    private Long shippingFee;
+    private Integer serviceType;
 }

@@ -41,7 +41,7 @@ public class CODService extends PaymentFactory{
     public ResponseEntity<?> executePayment(String paymentId, String payerId, String responseCode, String id, HttpServletRequest request, HttpServletResponse response) {
         Optional<Order> order = orderRepository.findById(paymentId);
         if (order.isPresent() && order.get().getState().equals(Constants.ORDER_STATE_PENDING)) {
-            order.get().setState(Constants.ORDER_STATE_DELIVERY);
+            order.get().setState(Constants.ORDER_STATE_PREPARE);
             orderRepository.save(order.get());
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Confirmed order successfully", ""));

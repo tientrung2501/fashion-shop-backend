@@ -14,4 +14,5 @@ public class ShippingReq {
     private String to_ward_code;
     private Long ward_code;
     private Long weight;
+    private Long height;
 }

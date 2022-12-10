@@ -6,16 +6,23 @@ import com.capstone.fashionshop.exception.NotFoundException;
 import com.capstone.fashionshop.mapper.OrderMapper;
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.payload.ResponseObject;
+import com.capstone.fashionshop.payload.request.CreateShippingReq;
 import com.capstone.fashionshop.payload.response.OrderRes;
 import com.capstone.fashionshop.repository.OrderRepository;
 import com.capstone.fashionshop.services.payment.PaymentUtils;
+import com.capstone.fashionshop.services.shipping.ShippingAPIService;
 import lombok.AllArgsConstructor;
+import org.bson.types.ObjectId;
+import org.cloudinary.json.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.net.http.HttpResponse;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +36,7 @@ public class OrderService implements IOrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final PaymentUtils paymentUtils;
+    private final ShippingAPIService shippingAPIService;
 
     @Override
     public ResponseEntity<?> findAll(String state, Pageable pageable) {
@@ -84,5 +92,56 @@ public class OrderService implements IOrderService {
                     "You cannot cancel while the order is still processing!");
         }
         throw new NotFoundException("Can not found order with id: " + id);
+    }
+
+    @Override
+    public ResponseEntity<?> createShip(CreateShippingReq req, String orderId) {
+        Optional<Order> order = orderRepository.findOrderByIdAndState(orderId, Constants.ORDER_STATE_PREPARE);
+        if (order.isPresent()) {
+            order.get().setState(Constants.ORDER_STATE_DELIVERY);
+            HttpResponse<?> response = shippingAPIService.create(req, order.get());
+            JSONObject objectRes = new JSONObject(response.body().toString()).getJSONObject("data");
+            order.get().getDeliveryDetail().getDeliveryInfo().put("orderCode", objectRes.getString("order_code"));
+            order.get().getDeliveryDetail().getDeliveryInfo().put("fee", objectRes.getLong("total_fee"));
+            order.get().getDeliveryDetail().getDeliveryInfo().put("expectedDeliveryTime", objectRes.getString("expected_delivery_time"));
+            orderRepository.save(order.get());
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Create shipping order successfully", order.get().getDeliveryDetail().getDeliveryInfo()));
+        } else throw new NotFoundException("Can not found order with id: " + orderId + " is prepare");
+    }
+
+    @Override
+    public ResponseEntity<?> changeState(String state, String orderId) {
+        Optional<Order> order = orderRepository.findById(orderId);
+        if (order.isPresent()) {
+            if (Constants.ORDER_STATE_DELIVERED.equals(state)) {
+                if (order.get().getState().equals(Constants.ORDER_STATE_DELIVERY)) {
+                    order.get().setState(Constants.ORDER_STATE_DELIVERED);
+                    order.get().getDeliveryDetail().getDeliveryInfo().put("deliveredAt", LocalDateTime.now(Clock.systemUTC()));
+                } else throw new AppException(HttpStatus.BAD_REQUEST.value(), "Order have not been delivering");
+            } else {
+                throw new AppException(HttpStatus.BAD_REQUEST.value(), "Invalid state");
+            }
+            orderRepository.save(order.get());
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Change state of order successfully", state));
+        } else throw new NotFoundException("Can not found order with id: " + orderId);
+    }
+
+    @Override
+    public ResponseEntity<?> changeState(String state, String orderId, String userId) {
+        Optional<Order> order = orderRepository.findOrderByIdAndUser_Id(orderId, new ObjectId(userId));
+        if (order.isPresent()) {
+            if (Constants.ORDER_STATE_DONE.equals(state)) {
+                if (order.get().getState().equals(Constants.ORDER_STATE_DELIVERED))
+                    order.get().setState(Constants.ORDER_STATE_DONE);
+                else throw new AppException(HttpStatus.BAD_REQUEST.value(), "Order have not been delivered");
+            } else {
+                throw new AppException(HttpStatus.BAD_REQUEST.value(), "Invalid state");
+            }
+            orderRepository.save(order.get());
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Finish order successfully", state));
+        } else throw new NotFoundException("Can not found order with id: " + orderId);
     }
 }

@@ -66,6 +66,8 @@ public class PaymentService {
             DeliveryDetail deliveryDetail = new DeliveryDetail(req.getName(), req.getPhone(),
                     req.getProvince(), req.getDistrict(), req.getWard(),req.getAddress());
             order.get().setDeliveryDetail(deliveryDetail);
+            order.get().getDeliveryDetail().getDeliveryInfo().put("fee", req.getShippingFee());
+            order.get().getDeliveryDetail().getDeliveryInfo().put("serviceType", req.getServiceType());
             order.get().setState(Constants.ORDER_STATE_PROCESS);
             order.get().getItems().forEach(item -> item.setPrice(new BigDecimal((item.getItem().getProduct().getPrice()
                     .add(item.getItem().getExtraFee()))
