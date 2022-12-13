@@ -157,7 +157,5 @@ public class ShippingAPIService {
         body.addProperty("to_district_name", req.getTo_district_name());
         body.addProperty("to_ward_name", req.getTo_ward_name());
         body.addProperty("to_ward_code", order.getDeliveryDetail().getReceiveWard());
-
     }
-
 }

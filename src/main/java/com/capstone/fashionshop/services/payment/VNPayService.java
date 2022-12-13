@@ -6,12 +6,14 @@ import com.capstone.fashionshop.exception.NotFoundException;
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.repository.OrderRepository;
+import com.capstone.fashionshop.utils.PaymentValidatorUtils;
 import com.capstone.fashionshop.utils.StringUtils;
 import com.capstone.fashionshop.utils.VNPayUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +29,8 @@ import java.util.*;
 public class VNPayService extends PaymentFactory {
     private final OrderRepository orderRepository;
     private final PaymentUtils paymentUtils;
+    private final PaymentValidatorUtils paymentValidatorUtils;
+    private final TaskScheduler taskScheduler;
 
     @SneakyThrows
     @Override
@@ -64,18 +68,24 @@ public class VNPayService extends PaymentFactory {
         queryUrl += VNPayUtils.vnp_SecureHash + vnp_SecureHash;
         String paymentUrl = VNPayUtils.vnp_PayUrl + "?" + queryUrl;
         String checkUpdateQuantityProduct = paymentUtils.checkingUpdateQuantityProduct(order, true);
-        if (checkUpdateQuantityProduct == null)
+        if (checkUpdateQuantityProduct == null) {
+            paymentValidatorUtils.setOrderId(order.getId());
+            paymentValidatorUtils.setOrderRepository(orderRepository);
+            paymentValidatorUtils.setPaymentUtils(paymentUtils);
+            taskScheduler.schedule(paymentValidatorUtils, new Date(System.currentTimeMillis() + Constants.PAYMENT_TIMEOUT)) ;
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Payment Complete", paymentUrl));
-        else throw new AppException(HttpStatus.CONFLICT.value(), "Quantity exceeds the available stock!");
+        } else throw new AppException(HttpStatus.CONFLICT.value(), "Quantity exceeds the available stock!");
     }
 
     @SneakyThrows
     @Override
     public ResponseEntity<?> executePayment(String paymentId, String payerId, String responseCode, String id, HttpServletRequest request, HttpServletResponse response) {
         Optional<Order> order = orderRepository.findById(id);
-        if (order.isEmpty() || !order.get().getState().equals(Constants.ORDER_STATE_PROCESS))
+        if (order.isEmpty() || !order.get().getState().equals(Constants.ORDER_STATE_PROCESS)) {
+            response.sendRedirect(PaymentService.CLIENT_REDIRECT + "false&cancel=false");
             throw new NotFoundException("Can not found order with id: " + id);
+        }
         if (responseCode.equals(VNPayUtils.responseSuccessCode)) {
             order.get().getPaymentDetail().getPaymentInfo().put("amount", request.getParameter(VNPayUtils.vnp_Amount));
             order.get().getPaymentDetail().getPaymentInfo().put("bankCode", request.getParameter("vnp_BankCode"));

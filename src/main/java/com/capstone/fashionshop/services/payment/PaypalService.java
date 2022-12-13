@@ -4,10 +4,12 @@ import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.config.paypal.PaypalPaymentIntent;
 import com.capstone.fashionshop.config.paypal.PaypalPaymentMethod;
 import com.capstone.fashionshop.exception.AppException;
+import com.capstone.fashionshop.exception.NotFoundException;
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.repository.OrderRepository;
 import com.capstone.fashionshop.utils.MoneyUtils;
+import com.capstone.fashionshop.utils.PaymentValidatorUtils;
 import com.capstone.fashionshop.utils.StringUtils;
 import com.paypal.api.payments.*;
 import com.paypal.base.rest.APIContext;
@@ -17,6 +19,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +40,8 @@ public class PaypalService extends PaymentFactory{
     private APIContext apiContext;
     private PaymentUtils paymentUtils;
     private final OrderRepository orderRepository;
+    private final PaymentValidatorUtils paymentValidatorUtils;
+    private final TaskScheduler taskScheduler;
 
     @Override
     @Transactional
@@ -56,14 +61,16 @@ public class PaypalService extends PaymentFactory{
                 if (links.getRel().equals("approval_url")) {
                     String checkUpdateQuantityProduct = paymentUtils.checkingUpdateQuantityProduct(order, true);
                     if (checkUpdateQuantityProduct == null) {
-                        Map<String, Object> params = new HashMap<>();
                         if (!payment.getTransactions().isEmpty())
-                            params.put("amount", payment.getTransactions().get(0).getAmount());
-                        order.getPaymentDetail().setPaymentInfo(params);
+                            order.getPaymentDetail().getPaymentInfo().put("amount", payment.getTransactions().get(0).getAmount());
                         order.getPaymentDetail().setPaymentId(payment.getId());
                         order.getPaymentDetail().setPaymentToken((links.getHref().split(PATTERN)[1]));
                         order.getPaymentDetail().getPaymentInfo().put("isPaid", false);
                         orderRepository.save(order);
+                        paymentValidatorUtils.setOrderId(order.getId());
+                        paymentValidatorUtils.setOrderRepository(orderRepository);
+                        paymentValidatorUtils.setPaymentUtils(paymentUtils);
+                        taskScheduler.schedule(paymentValidatorUtils, new Date(System.currentTimeMillis() + Constants.PAYMENT_TIMEOUT)) ;
                         return ResponseEntity.status(HttpStatus.OK).body(
                                 new ResponseObject(true, "Payment init complete", links.getHref()));
                     }
@@ -90,6 +97,9 @@ public class PaypalService extends PaymentFactory{
                     order.get().getPaymentDetail().getPaymentInfo().put("isPaid", true);
                     order.get().setState(Constants.ORDER_STATE_PREPARE);
                     orderRepository.save(order.get());
+                } else {
+                    response.sendRedirect(PaymentService.CLIENT_REDIRECT + "false&cancel=false");
+                    throw new NotFoundException("Can not found order with id: " + id);
                 }
                 response.sendRedirect(PaymentService.CLIENT_REDIRECT + "true&cancel=false");
                 return ResponseEntity.status(HttpStatus.OK).body(
@@ -99,7 +109,7 @@ public class PaypalService extends PaymentFactory{
         } catch (PayPalRESTException e) {
             log.error(e.getMessage());
         }
-        response.sendRedirect(PaymentService.CLIENT_REDIRECT + "true&cancel=false");
+        response.sendRedirect(PaymentService.CLIENT_REDIRECT + "false&cancel=false");
         return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(
                 new ResponseObject(false, "Payment with Paypal failed", "")
         );

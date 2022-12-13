@@ -24,6 +24,7 @@ public class Constants {
     public static final String PAYMENT_PAYPAL = "paypal";
     public static final String PAYMENT_VNPAY = "vnpay";
     public static final String PAYMENT_COD = "cod";
+    public static final int PAYMENT_TIMEOUT = 10 * 60 * 1000;
     //API GHN
     public static String GHN_URL = "https://dev-online-gateway.ghn.vn/shiip/public-api/";
 

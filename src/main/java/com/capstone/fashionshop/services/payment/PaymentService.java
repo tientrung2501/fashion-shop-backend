@@ -61,7 +61,7 @@ public class PaymentService {
                 throw new NotFoundException("Can not found any order with id: " + id);
             }
             PaymentDetail paymentDetail = new PaymentDetail(null,paymentType.toUpperCase(), "", new HashMap<>());
-            paymentDetail.getPaymentInfo().put("orderDate", LocalDateTime.now(Clock.systemUTC()));
+            paymentDetail.getPaymentInfo().put("orderDate", LocalDateTime.now(Clock.systemDefaultZone()));
             order.get().setPaymentDetail(paymentDetail);
             DeliveryDetail deliveryDetail = new DeliveryDetail(req.getName(), req.getPhone(),
                     req.getProvince(), req.getDistrict(), req.getWard(),req.getAddress());
