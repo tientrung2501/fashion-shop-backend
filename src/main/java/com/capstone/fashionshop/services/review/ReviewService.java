@@ -64,7 +64,7 @@ public class ReviewService implements IReviewService{
             if (product.isPresent()) {
                 Review newReview = new Review(req.getContent(), req.getRate(), product.get(), user.get(), true);
                 reviewRepository.save(newReview);
-                double rate = ((product.get().getRate() * product.get().getRateCount()) + req.getRate())/ (product.get().getRateCount()+1);
+                double rate = ((product.get().getRate() * product.get().getRateCount()) + req.getRate())/ (product.get().getRateCount());
                 product.get().setRate(rate);
                 productRepository.save(product.get());
                 return ResponseEntity.status(HttpStatus.OK).body(
