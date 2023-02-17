@@ -1,6 +1,7 @@
 package com.capstone.fashionshop.services.product;
 
 import com.capstone.fashionshop.models.entities.product.ProductAttribute;
+import com.capstone.fashionshop.payload.request.ProductPriceAndDiscount;
 import com.capstone.fashionshop.payload.request.ProductReq;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,8 @@ public interface IProductService {
     ResponseEntity<?> search(String key, Pageable pageable);
     ResponseEntity<?> addProduct(ProductReq req);
     ResponseEntity<?> updateProduct(String id, ProductReq req);
+    ResponseEntity<?> updateMultiplePriceAndDiscount(ProductPriceAndDiscount req);
+    ResponseEntity<?> updatePriceAndDiscount(ProductPriceAndDiscount req);
     ResponseEntity<?> deactivatedProduct(String id);
     ResponseEntity<?> destroyProduct(String id);
     ResponseEntity<?> addAttribute(String id, ProductAttribute req);

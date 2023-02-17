@@ -4,6 +4,7 @@ import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.models.entities.product.ProductAttribute;
 import com.capstone.fashionshop.payload.request.ImageReq;
+import com.capstone.fashionshop.payload.request.ProductPriceAndDiscount;
 import com.capstone.fashionshop.payload.request.ProductReq;
 import com.capstone.fashionshop.services.product.IProductService;
 import lombok.AllArgsConstructor;
@@ -103,5 +104,11 @@ public class ProductController {
     public ResponseEntity<?> deleteImage(@PathVariable("productId") String id,
                                          @RequestBody ImageReq req) {
         return productService.deleteImageFromProduct(id, req.getImageId());
+    }
+
+    @PutMapping("/manage/products/price")
+    public ResponseEntity<?> updatePriceAndDiscount(@Valid @RequestBody ProductPriceAndDiscount req) {
+        if (req.getId().contains(",")) return productService.updateMultiplePriceAndDiscount(req);
+        else return productService.updatePriceAndDiscount(req);
     }
 }

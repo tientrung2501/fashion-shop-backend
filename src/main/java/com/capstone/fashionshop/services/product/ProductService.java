@@ -11,6 +11,7 @@ import com.capstone.fashionshop.models.entities.product.Product;
 import com.capstone.fashionshop.models.entities.product.ProductAttribute;
 import com.capstone.fashionshop.models.entities.product.ProductImage;
 import com.capstone.fashionshop.payload.ResponseObject;
+import com.capstone.fashionshop.payload.request.ProductPriceAndDiscount;
 import com.capstone.fashionshop.payload.request.ProductReq;
 import com.capstone.fashionshop.payload.response.ProductListRes;
 import com.capstone.fashionshop.payload.response.ProductRes;
@@ -163,6 +164,8 @@ public class ProductService implements IProductService {
             product.setDescription(req.getDescription());
         if (!req.getPrice().equals(product.getPrice()))
             product.setPrice(req.getPrice());
+        if (req.getDiscount() != product.getDiscount())
+            product.setDiscount(req.getDiscount());
         if (!req.getCategory().equals(product.getCategory().getId())) {
             Optional<Category> category = categoryRepository.findCategoryByIdAndState(req.getCategory(), Constants.ENABLE);
             if (category.isPresent())
@@ -180,6 +183,48 @@ public class ProductService implements IProductService {
                 req.getState().equalsIgnoreCase(Constants.DISABLE)))
             product.setState(req.getState());
         else throw new AppException(HttpStatus.BAD_REQUEST.value(), "Invalid state");
+    }
+
+    @Override
+    public ResponseEntity<?> updateMultiplePriceAndDiscount(ProductPriceAndDiscount req) {
+        List<Product> products = productRepository.findAllByIdIsIn(List.of(req.getId().split(",")));
+        if (products.isEmpty()) throw new NotFoundException("Can not found any product with id: " + req.getId());
+        else {
+            products.stream().forEach(p -> {
+                if (req.getPrice() != null && !req.getPrice().equals(p.getPrice()))
+                    p.setPrice(req.getPrice());
+                if (req.getDiscount() != -1 && req.getDiscount() != p.getDiscount())
+                    p.setDiscount(req.getDiscount());
+            });
+            try {
+                productRepository.saveAll(products);
+            } catch (Exception e) {
+                throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), e.getMessage());
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Update product price and discount successfully ", req)
+            );
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> updatePriceAndDiscount(ProductPriceAndDiscount req) {
+        Optional<Product> product = productRepository.findById(req.getId());
+        if (product.isPresent()) {
+            if (req.getPrice() != null && !req.getPrice().equals(product.get().getPrice()))
+                product.get().setPrice(req.getPrice());
+            if (req.getDiscount() != -1 && req.getDiscount() != product.get().getDiscount())
+                product.get().setDiscount(req.getDiscount());
+            try {
+                productRepository.save(product.get());
+            } catch (Exception e) {
+                throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), e.getMessage());
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject(true, "Update product price and discount successfully ", req)
+            );
+        }
+        throw new NotFoundException("Can not found product with id: "+ req.getId());
     }
 
     @Override
