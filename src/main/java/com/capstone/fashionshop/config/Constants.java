@@ -26,6 +26,10 @@ public class Constants {
     public static final String PAYMENT_COD = "cod";
     public static final int PAYMENT_TIMEOUT = 10 * 60 * 1000;
     //API GHN
-    public static String GHN_URL = "https://dev-online-gateway.ghn.vn/shiip/public-api/";
+    public static final String GHN_URL = "https://dev-online-gateway.ghn.vn/shiip/public-api/";
+    //RECOMMEND TYPE
+    public static final String REVIEW_GOOD_TYPE = "review";
+    public static final String VIEW_TYPE = "view";
+    public static final String CART_TYPE = "cart";
 
 }

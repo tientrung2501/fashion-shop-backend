@@ -8,6 +8,7 @@ import com.capstone.fashionshop.services.review.IReviewService;
 import lombok.AllArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class ReviewController {
 
     @GetMapping(path = "/reviews/{productId}")
     public ResponseEntity<?> findByProductId (@PathVariable("productId") String productId,
-                                              @PageableDefault(size = 5, sort = "createdDate, DESC") @ParameterObject Pageable pageable){
+                                              @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable){
         return reviewService.findByProductId(productId, pageable);
     }
 

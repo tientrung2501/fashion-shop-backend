@@ -1,5 +1,6 @@
 package com.capstone.fashionshop.models.entities;
 
+import com.capstone.fashionshop.models.entities.order.OrderItem;
 import com.capstone.fashionshop.models.entities.product.Product;
 import com.capstone.fashionshop.models.entities.user.User;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -33,6 +34,10 @@ public class Review {
     private Product product;
     @DocumentReference(lazy = true)
     @JsonIgnore
+    @Indexed(unique = true)
+    private OrderItem orderItem;
+    @DocumentReference(lazy = true)
+    @JsonIgnore
     @Indexed
     private User user;
     private boolean enable;
@@ -43,10 +48,11 @@ public class Review {
     @LastModifiedDate
     LocalDateTime lastModifiedDate;
 
-    public Review(String content, double rate, Product product, User user, boolean enable) {
+    public Review(String content, double rate, Product product, OrderItem orderItem, User user, boolean enable) {
         this.content = content;
         this.rate = rate;
         this.product = product;
+        this.orderItem = orderItem;
         this.user = user;
         this.enable = enable;
     }

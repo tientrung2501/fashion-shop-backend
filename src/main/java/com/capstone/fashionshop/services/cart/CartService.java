@@ -16,14 +16,17 @@ import com.capstone.fashionshop.repository.OrderItemRepository;
 import com.capstone.fashionshop.repository.OrderRepository;
 import com.capstone.fashionshop.repository.ProductOptionRepository;
 import com.capstone.fashionshop.repository.UserRepository;
+import com.capstone.fashionshop.utils.RecommendCheckUtils;
 import lombok.AllArgsConstructor;
 import lombok.Synchronized;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -34,6 +37,8 @@ public class CartService implements ICartService{
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final CartMapper cartMapper;
+    private final RecommendCheckUtils recommendCheckUtils;
+    private final TaskScheduler taskScheduler;
 
     @Override
     public ResponseEntity<?> getProductFromCart(String userId) {
@@ -60,14 +65,14 @@ public class CartService implements ICartService{
                         p -> p.getItem().getId().equals(req.getProductOptionId())
                                 && p.getColor().equals(req.getColor())).findFirst();
                 if (item.isPresent()) return processUpdateProductInCart(item.get(), req);
-                else return processAddProductToExistOrder(order.get(), req);
-            } else return processAddProductToOrder(user.get(), req);
+                else return processAddProductToExistOrder(order.get(), req, userId);
+            } else return processAddProductToOrder(user.get(), req, userId);
         } throw new NotFoundException("Can not found user with id: "+userId);
     }
 
     @Transactional
     @Synchronized
-    ResponseEntity<?> processAddProductToOrder(User user, CartReq req) {
+    ResponseEntity<?> processAddProductToOrder(User user, CartReq req, String userId) {
         if (req.getQuantity() <= 0) throw new AppException(HttpStatus.BAD_REQUEST.value(), "Invalid quantity");        Optional<ProductOption> productOption = productOptionRepository.findByIdAndVariantColor(req.getProductOptionId(), req.getColor());
         if (productOption.isPresent()) {
             checkProductQuantity(productOption.get(), req);
@@ -76,12 +81,14 @@ public class CartService implements ICartService{
             OrderItem item = new OrderItem(productOption.get(), req.getColor(), req.getQuantity(), order);
             orderItemRepository.insert(item);
             CartItemRes res = CartMapper.toCartItemRes(item);
+            addScoreToRecommendation(productOption.get().getProduct().getCategory().getId(),
+                    productOption.get().getProduct().getBrand().getId(), userId);
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     new ResponseObject(true, "Add product to cart first time success", res));
         } else throw new NotFoundException("Can not found product option with id: "+req.getProductOptionId());
     }
 
-    private ResponseEntity<?> processAddProductToExistOrder(Order order, CartReq req) {
+    private ResponseEntity<?> processAddProductToExistOrder(Order order, CartReq req, String userId) {
         if (req.getQuantity() <= 0) throw new AppException(HttpStatus.BAD_REQUEST.value(), "Invalid quantity");
         Optional<ProductOption> productOption = productOptionRepository.findByIdAndVariantColor(req.getProductOptionId(), req.getColor());
         if (productOption.isPresent()) {
@@ -89,17 +96,26 @@ public class CartService implements ICartService{
             OrderItem item = new OrderItem(productOption.get(), req.getColor(), req.getQuantity(), order);
             orderItemRepository.insert(item);
             CartItemRes res = CartMapper.toCartItemRes(item);
+            addScoreToRecommendation(productOption.get().getProduct().getCategory().getId(),
+                    productOption.get().getProduct().getBrand().getId(), userId);
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     new ResponseObject(true, "Add product to cart success", res));
         } else throw new NotFoundException("Can not found product option with id: "+req.getProductOptionId());
     }
 
+    private void addScoreToRecommendation(String catId, String brandId, String userId) {
+        recommendCheckUtils.setCatId(catId);
+        recommendCheckUtils.setBrandId(brandId);
+        recommendCheckUtils.setType(Constants.CART_TYPE);
+        recommendCheckUtils.setUserId(userId);
+        recommendCheckUtils.setUserRepository(userRepository);
+        taskScheduler.schedule(recommendCheckUtils, new Date(System.currentTimeMillis()));
+    }
+
     private void checkProductQuantity(ProductOption productOption, CartReq req) {
         productOption.getVariants().forEach(v -> {
-            if (v.getColor().equals(req.getColor())) {
-                if (v.getStock() < req.getQuantity() ) {
-                    throw new AppException(HttpStatus.CONFLICT.value(), "Quantity exceeds stock on product: "+req.getProductOptionId());
-                }
+            if (v.getColor().equals(req.getColor()) && v.getStock() < req.getQuantity()) {
+                throw new AppException(HttpStatus.CONFLICT.value(), "Quantity exceeds stock on product: "+req.getProductOptionId());
             }
         });
     }

@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface IProductService {
     ResponseEntity<?> findAll(String state, Pageable pageable);
-    ResponseEntity<?> findById(String id);
+    ResponseEntity<?> findById(String id, String userId);
     ResponseEntity<?> findByCategoryIdOrBrandId(String catId, Pageable pageable);
     ResponseEntity<?> search(String key, Pageable pageable);
     ResponseEntity<?> addProduct(ProductReq req);

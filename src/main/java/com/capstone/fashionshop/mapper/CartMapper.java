@@ -34,7 +34,7 @@ public class CartMapper {
                     orderItem.getItem().getProduct().getDiscount(),
                     image.get().getUrl(), price,
                     orderItem.getItem().getId(), orderItem.getColor(), orderItem.getItem().getName(),
-                    orderItem.getQuantity(), orderItem.getItem().getVariants().get(0).getStock(), orderItem.getSubPrice());
+                    orderItem.getQuantity(), orderItem.getItem().getVariants().get(0).getStock(), orderItem.getSubPrice(), orderItem.isReviewed());
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "get cart item failed");

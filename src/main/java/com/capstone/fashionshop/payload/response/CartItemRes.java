@@ -21,5 +21,6 @@ public class CartItemRes {
     private long quantity;
     private long stock;
     private BigDecimal subPrice;
+    private boolean reviewed;
 }
 

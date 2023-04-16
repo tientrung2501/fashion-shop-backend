@@ -20,7 +20,10 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Document(collection = "users")
 @Data
@@ -64,6 +67,9 @@ public class User {
     private List<Review> reviews;
     @JsonIgnore
     private Token token;
+    @JsonIgnore
+    @Indexed
+    private Map<Object, Integer> recommendRanking = new HashMap<>();
     @CreatedDate
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     LocalDateTime createdDate;

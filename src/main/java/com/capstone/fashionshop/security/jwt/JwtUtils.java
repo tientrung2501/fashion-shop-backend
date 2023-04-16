@@ -27,11 +27,15 @@ public class JwtUtils {
 
     public User getUserFromJWT(String token) {
         User user = new User();
-        String subject = Jwts.parser().setSigningKey(JWT_SECRET.getBytes()).parseClaimsJws(token).getBody().getSubject();
-        String[] jwtSubject = subject.split(",");
+        try  {
+            String subject = Jwts.parser().setSigningKey(JWT_SECRET.getBytes()).parseClaimsJws(token).getBody().getSubject();
+            String[] jwtSubject = subject.split(",");
 
-        user.setId(jwtSubject[0]);
-        user.setEmail(jwtSubject[1]);
+            user.setId(jwtSubject[0]);
+            user.setEmail(jwtSubject[1]);
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
+        }
         return user;
     }
 

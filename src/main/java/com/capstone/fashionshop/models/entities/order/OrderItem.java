@@ -42,6 +42,7 @@ public class OrderItem {
     private Order order;
     @Field(targetType = DECIMAL128)
     private BigDecimal price = BigDecimal.ZERO;
+    private boolean reviewed = false;
     @Transient
     private BigDecimal subPrice = BigDecimal.ZERO;
 

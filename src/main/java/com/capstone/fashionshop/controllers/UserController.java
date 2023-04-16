@@ -6,6 +6,7 @@ import com.capstone.fashionshop.payload.request.ChangePasswordReq;
 import com.capstone.fashionshop.payload.request.RegisterReq;
 import com.capstone.fashionshop.payload.request.UserReq;
 import com.capstone.fashionshop.security.jwt.JwtUtils;
+import com.capstone.fashionshop.services.recommend.IRecommendService;
 import com.capstone.fashionshop.services.user.IUserService;
 import lombok.AllArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
@@ -24,6 +25,7 @@ import javax.validation.Valid;
 @RequestMapping("/api")
 public class UserController {
     private final IUserService userService;
+    private final IRecommendService recommendService;
     private final JwtUtils jwtUtils;
 
     @GetMapping(path = "/admin/manage/users")
@@ -104,5 +106,13 @@ public class UserController {
         if (!user.getId().isBlank())
             return userService.getUserOrderHistory(user.getId());
         throw new AppException(HttpStatus.FORBIDDEN.value(), "You don't have permission! Token is invalid");
+    }
+
+    @GetMapping(path = "/users/recommend")
+    public ResponseEntity<?> recommendProduct (HttpServletRequest request){
+        User user = jwtUtils.getUserFromJWT(jwtUtils.getJwtFromHeader(request));
+        if (!user.getId().isBlank())
+            return recommendService.recommendProduct(user.getId());
+        else return recommendService.recommendProduct("-1");
     }
 }

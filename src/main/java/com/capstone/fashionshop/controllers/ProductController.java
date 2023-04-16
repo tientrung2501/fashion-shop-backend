@@ -3,9 +3,11 @@ package com.capstone.fashionshop.controllers;
 import com.capstone.fashionshop.config.Constants;
 import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.models.entities.product.ProductAttribute;
+import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.payload.request.ImageReq;
 import com.capstone.fashionshop.payload.request.ProductPriceAndDiscount;
 import com.capstone.fashionshop.payload.request.ProductReq;
+import com.capstone.fashionshop.security.jwt.JwtUtils;
 import com.capstone.fashionshop.services.product.IProductService;
 import lombok.AllArgsConstructor;
 import org.springdoc.api.annotations.ParameterObject;
@@ -16,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @RestController
@@ -23,10 +26,12 @@ import javax.validation.Valid;
 @RequestMapping("/api")
 public class ProductController {
     private final IProductService productService;
+    private final JwtUtils jwtUtils;
 
     @GetMapping(path = "/products/{id}")
-    public ResponseEntity<?> findById (@PathVariable("id") String id){
-        return productService.findById(id);
+    public ResponseEntity<?> findById (@PathVariable("id") String id, HttpServletRequest request){
+        User user = jwtUtils.getUserFromJWT(jwtUtils.getJwtFromHeader(request));
+        return productService.findById(id, user.getId());
     }
 
     @GetMapping(path = "/products/category/{id}")

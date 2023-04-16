@@ -19,6 +19,11 @@ public interface ProductRepository extends MongoRepository<Product, String> {
     Optional<Product> findProductByIdAndState(String id, String state);
     Page<Product> findAllByState(String state, Pageable pageable);
     Page<Product> findAllByCategory_IdOrBrand_IdAndState(ObjectId catId, ObjectId brandId, String state, Pageable pageable);
+
+    @Query(value = "{ $or: [{'category' : {$in: ?0}},{'brand':{$in: ?1}}] ," +
+            "    'state' : 'enable'}")
+    Page<Product> findAllByRecommendCategoryOrBrand(List<ObjectId> catIds, List<ObjectId> brandIds, String state, Pageable pageable);
+
     @Query(value = "{ $or: [{'category' : ?0},{'category':{$in: ?1}}] ," +
             "    'state' : 'enable'}")
     Page<Product> findProductsByCategory(ObjectId id, List<ObjectId> subCat, Pageable pageable);

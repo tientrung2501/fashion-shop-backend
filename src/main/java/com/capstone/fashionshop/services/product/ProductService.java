@@ -15,10 +15,8 @@ import com.capstone.fashionshop.payload.request.ProductPriceAndDiscount;
 import com.capstone.fashionshop.payload.request.ProductReq;
 import com.capstone.fashionshop.payload.response.ProductListRes;
 import com.capstone.fashionshop.payload.response.ProductRes;
-import com.capstone.fashionshop.repository.BrandRepository;
-import com.capstone.fashionshop.repository.CategoryRepository;
-import com.capstone.fashionshop.repository.ProductOptionRepository;
-import com.capstone.fashionshop.repository.ProductRepository;
+import com.capstone.fashionshop.repository.*;
+import com.capstone.fashionshop.utils.RecommendCheckUtils;
 import com.mongodb.MongoWriteException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.TextCriteria;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,6 +46,10 @@ public class ProductService implements IProductService {
     private final BrandRepository brandRepository;
     private final ProductMapper productMapper;
     private final CloudinaryConfig cloudinary;
+    private final RecommendCheckUtils recommendCheckUtils;
+    private final TaskScheduler taskScheduler;
+    private final UserRepository userRepository;
+
     @Override
     public ResponseEntity<?> findAll(String state, Pageable pageable) {
         Page<Product> products;
@@ -64,17 +67,23 @@ public class ProductService implements IProductService {
         resp.put("list", resList);
         resp.put("totalQuantity", products.getTotalElements());
         resp.put("totalPage", products.getTotalPages());
-        if (resList.size() >0 )
+        if (!resList.isEmpty() )
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Get all product success", resp));
         return null;
     }
 
     @Override
-    public ResponseEntity<?> findById(String id) {
+    public ResponseEntity<?> findById(String id, String userId) {
         Optional<Product> product = productRepository.findProductByIdAndState(id, Constants.ENABLE);
         if (product.isPresent()) {
             ProductRes res = productMapper.toProductRes(product.get());
+            recommendCheckUtils.setCatId(res.getCategory());
+            recommendCheckUtils.setBrandId(res.getBrand());
+            recommendCheckUtils.setType(Constants.VIEW_TYPE);
+            recommendCheckUtils.setUserId(userId);
+            recommendCheckUtils.setUserRepository(userRepository);
+            taskScheduler.schedule(recommendCheckUtils, new Date(System.currentTimeMillis()));
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Get product success", res));
         }
