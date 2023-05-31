@@ -10,10 +10,10 @@ public class VNPayUtils {
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     public static String vnp_Returnurl =
             "/api/checkout/vnpay/success";
-    public static String vnp_HashSecret = "IJSZUKHJGTJAPZQHIBHRYQZBDRWIQGKJ";//CYRZSLSDARTODVXSOAOSGJMZULNPUQZI
+    public static String vnp_HashSecret = "NTJRNUKVRWGSPAGNCVQKMRWORUSWRZDZ";//CYRZSLSDARTODVXSOAOSGJMZULNPUQZI
     public static String vnp_apiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/merchant.html";
     public static String vnp_orderType = "200000";
-    public static String vnp_TmnCode = "2NVBP3BW";//LDASSMNX
+    public static String vnp_TmnCode = "5G5F5LXV";//LDASSMNX
     public static String vnp_currCode = "VND";
     public static String vnp_Version = "2.1.0";
     public static String vnp_Command = "pay";
