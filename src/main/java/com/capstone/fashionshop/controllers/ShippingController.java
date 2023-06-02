@@ -33,6 +33,11 @@ public class ShippingController {
         return shippingAPIService.calculateFee(req);
     }
 
+    @PostMapping(path = "/expectedTime", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> calculateExpectedDeliveryTime (@RequestBody ShippingReq req) {
+        return shippingAPIService.calculateExpectedDeliveryTime(req);
+    }
+
     @PostMapping(path = "/service", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getService (@RequestBody ShippingReq req) {
         return shippingAPIService.getService(req);

@@ -24,4 +24,5 @@ public class CheckoutReq {
     private String address;
     private Long shippingFee;
     private Integer serviceType;
+    private Long expectedDeliveryTime = 0L;
 }

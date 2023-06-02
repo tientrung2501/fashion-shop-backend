@@ -6,6 +6,8 @@ import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.exception.NotFoundException;
 import com.capstone.fashionshop.mapper.OrderMapper;
 import com.capstone.fashionshop.mapper.UserMapper;
+import com.capstone.fashionshop.models.entities.order.Order;
+import com.capstone.fashionshop.models.entities.product.Product;
 import com.capstone.fashionshop.models.entities.user.User;
 import com.capstone.fashionshop.models.enums.EGender;
 import com.capstone.fashionshop.models.enums.EProvider;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -73,7 +76,10 @@ public class UserService implements IUserService {
     public ResponseEntity<?> getUserOrderHistory(String id) {
         Optional<User> user = userRepository.findUserByIdAndState(id, Constants.USER_STATE_ACTIVATED);
         if (user.isPresent()) {
-            List<OrderRes> resList = user.get().getOrders().stream().map(orderMapper::toOrderRes).collect(Collectors.toList());
+            Comparator<Order> comparatorDesc = Comparator.comparing(Order::getCreatedDate).reversed();
+            List<Order> orders = user.get().getOrders();
+            orders.sort(comparatorDesc);
+            List<OrderRes> resList = orders.stream().map(orderMapper::toOrderRes).collect(Collectors.toList());
             if (resList.isEmpty()) throw new NotFoundException("Can not found any orders");
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Get order history of user success", resList));

@@ -94,6 +94,22 @@ public class ShippingAPIService {
         }
     }
 
+    public ResponseEntity<?> calculateExpectedDeliveryTime(ShippingReq req) {
+        try {
+            JsonObject body = new JsonObject();
+            body.addProperty("service_id", req.getService_type_id());
+            body.addProperty("to_district_id", req.getTo_district_id());
+            body.addProperty("to_ward_code", req.getTo_ward_code());
+
+            HttpResponse<?> res = HttpConnectTemplate.connectToGHN("v2/shipping-order/leadtime",
+                    body.toString(), TOKEN, SHOP_ID);
+            return ResponseEntity.status(res.statusCode()).body(res.body());
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new AppException(HttpStatus.EXPECTATION_FAILED.value(), "Failed when get expected delivery time");
+        }
+    }
+
     public ResponseEntity<?> getService(ShippingReq req) {
         try {
             JsonObject body = new JsonObject();
