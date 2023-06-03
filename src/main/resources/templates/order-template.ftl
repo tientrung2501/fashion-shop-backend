@@ -319,7 +319,7 @@
                     </td>
                 </tr>
                 <!-- end footer -->
-
+            </table>
             </table>
             <!-- end body -->
 </body>

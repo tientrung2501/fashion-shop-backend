@@ -6,6 +6,7 @@ import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.repository.OrderRepository;
 import com.capstone.fashionshop.services.mail.MailService;
+import com.capstone.fashionshop.utils.CancelMailUtils;
 import com.capstone.fashionshop.utils.MailUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ public class CODService extends PaymentFactory{
     private final OrderRepository orderRepository;
     private final TaskScheduler taskScheduler;
     private final MailUtils mailUtils;
+    private final CancelMailUtils cancelMailUtils;
     private final MailService mailService;
 
     @Override
@@ -67,6 +69,9 @@ public class CODService extends PaymentFactory{
             orderRepository.save(order.get());
             String checkUpdateQuantityProduct = paymentUtils.checkingUpdateQuantityProduct(order.get(), false);
             if (checkUpdateQuantityProduct == null) {
+                cancelMailUtils.setMailService(mailService);
+                cancelMailUtils.setOrder(order.get());
+                taskScheduler.schedule(cancelMailUtils, new Date(System.currentTimeMillis())) ;
                 return ResponseEntity.status(HttpStatus.OK).body(
                         new ResponseObject(true, "Cancel order successfully", ""));
             }

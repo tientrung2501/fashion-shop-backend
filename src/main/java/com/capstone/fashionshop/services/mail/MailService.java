@@ -30,6 +30,7 @@ public class MailService {
     final String TYPE_EMAIL = "text/html";
     final String TITLE_EMAIL_AUTH = "Mã xác minh Fashion Store Website";
     final String TITLE_EMAIL_ORDER = "Xác nhận đơn hàng tại Fashion Store Website";
+    final String TITLE_EMAIL_CANCEL = "Xác nhận đơn hàng bị hủy tại Fashion Store Website";
 
     public void sendEmail(String toEmail,
                           Map<String,Object> model,
@@ -46,6 +47,10 @@ public class MailService {
         else if (type.equals(EMailType.ORDER)){
             template = configuration.getTemplate(ORDER_TEMPLATE);
             model.put("title", TITLE_EMAIL_ORDER);
+        }
+        else if (type.equals(EMailType.CANCEL)){
+            template = configuration.getTemplate(CANCEL_TEMPLATE);
+            model.put("title", TITLE_EMAIL_CANCEL);
         }
         model.put("email", toEmail);
         String html = FreeMarkerTemplateUtils.processTemplateIntoString(Objects.requireNonNull(template),model);
