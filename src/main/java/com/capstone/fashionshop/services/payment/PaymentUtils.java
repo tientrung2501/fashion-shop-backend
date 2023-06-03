@@ -5,12 +5,24 @@ import com.capstone.fashionshop.exception.AppException;
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.repository.OrderRepository;
 import com.capstone.fashionshop.repository.ProductOptionRepository;
+import com.capstone.fashionshop.services.mail.EMailType;
+import com.capstone.fashionshop.services.mail.MailService;
 import com.mongodb.MongoWriteException;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.Synchronized;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.text.NumberFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
 @Service
 @AllArgsConstructor

@@ -22,6 +22,7 @@ public class CheckoutReq {
     private String ward;
     @NotBlank(message = "Address is required")
     private String address;
+    private String fullAddress = "";
     private Long shippingFee;
     private Integer serviceType;
     private Long expectedDeliveryTime = 0L;

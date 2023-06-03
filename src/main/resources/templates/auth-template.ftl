@@ -247,7 +247,7 @@
                 <!-- start unsubscribe -->
                 <tr>
                     <td align="center" bgcolor="#e9ecef" style="padding: 12px 24px; font-family: sans-serif; font-size: 14px; line-height: 20px; color: #666;">
-                        <p style="margin: 0;">© 2022 Nhóm 1 Tiểu Luận Chuyên Ngành, Thành phố Hồ Chí Minh</p>
+                        <p style="margin: 0;">© 2023 Nhóm 33 Khóa Luận Tốt Nghiệp, Thành phố Hồ Chí Minh</p>
                     </td>
                 </tr>
                 <!-- end unsubscribe -->

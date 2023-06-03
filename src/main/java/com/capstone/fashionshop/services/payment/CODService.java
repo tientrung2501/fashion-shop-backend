@@ -5,14 +5,18 @@ import com.capstone.fashionshop.exception.NotFoundException;
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.repository.OrderRepository;
+import com.capstone.fashionshop.services.mail.MailService;
+import com.capstone.fashionshop.utils.MailUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -21,6 +25,9 @@ import java.util.Optional;
 public class CODService extends PaymentFactory{
     private PaymentUtils paymentUtils;
     private final OrderRepository orderRepository;
+    private final TaskScheduler taskScheduler;
+    private final MailUtils mailUtils;
+    private final MailService mailService;
 
     @Override
     @Transactional
@@ -31,6 +38,9 @@ public class CODService extends PaymentFactory{
                 order.setState(Constants.ORDER_STATE_PENDING);
                 order.getPaymentDetail().getPaymentInfo().put("isPaid", false);
                 orderRepository.save(order);
+                mailUtils.setOrder(order);
+                mailUtils.setMailService(mailService);
+                taskScheduler.schedule(mailUtils, new Date(System.currentTimeMillis())) ;
                 return ResponseEntity.status(HttpStatus.OK).body(
                         new ResponseObject(true, " Pay by COD successfully", ""));
             }

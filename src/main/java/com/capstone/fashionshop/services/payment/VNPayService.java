@@ -6,6 +6,8 @@ import com.capstone.fashionshop.exception.NotFoundException;
 import com.capstone.fashionshop.models.entities.order.Order;
 import com.capstone.fashionshop.payload.ResponseObject;
 import com.capstone.fashionshop.repository.OrderRepository;
+import com.capstone.fashionshop.services.mail.MailService;
+import com.capstone.fashionshop.utils.MailUtils;
 import com.capstone.fashionshop.utils.PaymentValidatorUtils;
 import com.capstone.fashionshop.utils.StringUtils;
 import com.capstone.fashionshop.utils.VNPayUtils;
@@ -31,6 +33,8 @@ public class VNPayService extends PaymentFactory {
     private final PaymentUtils paymentUtils;
     private final PaymentValidatorUtils paymentValidatorUtils;
     private final TaskScheduler taskScheduler;
+    private final MailUtils mailUtils;
+    private final MailService mailService;
 
     @SneakyThrows
     @Override
@@ -93,6 +97,9 @@ public class VNPayService extends PaymentFactory {
             order.get().getPaymentDetail().getPaymentInfo().put("isPaid", true);
             order.get().setState(Constants.ORDER_STATE_PREPARE);
             orderRepository.save(order.get());
+            mailUtils.setOrder(order.get());
+            mailUtils.setMailService(mailService);
+            taskScheduler.schedule(mailUtils, new Date(System.currentTimeMillis())) ;
             response.sendRedirect(PaymentService.CLIENT_REDIRECT + "true&cancel=false");
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject(true, "Payment Completed", "")

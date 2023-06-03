@@ -168,7 +168,7 @@ public class ShippingAPIService {
         body.addProperty("to_name", order.getDeliveryDetail().getReceiveName());
         body.addProperty("to_phone", order.getDeliveryDetail().getReceivePhone());
         body.addProperty("to_address", order.getDeliveryDetail().getReceiveAddress());
-        body.addProperty("cod_amount", order.getTotalPrice());
+        body.addProperty("cod_amount", order.getTotalPrice().intValue());
         body.addProperty("to_province_name", req.getTo_province_name());
         body.addProperty("to_district_name", req.getTo_district_name());
         body.addProperty("to_ward_name", req.getTo_ward_name());

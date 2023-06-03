@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 import java.net.http.HttpResponse;
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -133,8 +130,10 @@ public class OrderService implements IOrderService {
         Optional<Order> order = orderRepository.findOrderByIdAndUser_Id(orderId, new ObjectId(userId));
         if (order.isPresent()) {
             if (Constants.ORDER_STATE_DONE.equals(state)) {
-                if (order.get().getState().equals(Constants.ORDER_STATE_DELIVERED))
+                if (order.get().getState().equals(Constants.ORDER_STATE_DELIVERED)){
                     order.get().setState(Constants.ORDER_STATE_DONE);
+                    order.get().getPaymentDetail().getPaymentInfo().put("isPaid", true);
+                }
                 else throw new AppException(HttpStatus.BAD_REQUEST.value(), "Order have not been delivered");
             } else {
                 throw new AppException(HttpStatus.BAD_REQUEST.value(), "Invalid state");
